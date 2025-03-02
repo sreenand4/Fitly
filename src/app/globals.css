@@ -1,11 +1,15 @@
-@import "tailwindcss";
-
-@theme {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@font-face {
+  font-family: "Margin";
+  src: url("/fonts/Margin DEMO.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
 }
 
+/* Define CSS Variables for Fonts */
 :root {
+  --font-sans: "Poppins", sans-serif;
+  --font-margin: "Margin", sans-serif;
+
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -20,5 +24,7 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-margin);
 }
+
+@import "tailwindcss";
