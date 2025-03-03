@@ -11,6 +11,9 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "Fitly | Fits Perfectly",
   description: "Fashion made for you",
+  icons: {
+    icon: "./favicon.png",
+  },
 };
 
 export default function RootLayout({

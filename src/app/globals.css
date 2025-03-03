@@ -16,15 +16,18 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --linen: #f8ede2;
+    --jet: #2b2b2b;
+    --taupe: #564033;
+    --sienna: #de6854;
+    --bone: #ded1c2;
   }
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
   font-family: var(--font-margin);
+  background-color: var(--linen);
+  color: var(--jet);
 }
 
 @import "tailwindcss";
