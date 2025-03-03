@@ -110,7 +110,7 @@ export default function Hero() {
         {/* background image */}
         <Image 
             src="/stars.png" 
-            alt="stars"
+            alt="sars"
             fill
             className="mt-10 object-cover z-[-1]" 
         />
