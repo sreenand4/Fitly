@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function Partners() {
     return (
-        <div className="w-full min-h-fit flex flex-col md:flex-row items-center py-10 px-20 md:px-40 bg-[var(--taupe)] gap-8">
+        <div id="partners" className="w-full min-h-fit flex flex-col md:flex-row items-center py-10 px-10 md:px-40 bg-[var(--taupe)] gap-8">
             {/* Text Content */}
             <div className="flex-3 text-center md:text-left p-4">
                 <h1 className="text-4xl md:text-5xl text-[var(--linen)] mb-4">For Retailers and Partners</h1>
@@ -14,12 +14,12 @@ export default function Partners() {
                     height={400} 
                     className="md:hidden mx-auto" 
                 />
-                <p className="text-lg lg:text-xl text-white font-sans mt-4">
+                <p className="text-lg lg:text-xl text-[var(--bone)] font-sans mt-4">
                     Fit+ly partners with retailers to showcase their collections on our platform, offering unparalleled visibility and engagement. Additionally, our proprietary technology can be licensed for integration directly into retailers’ native websites via an API, empowering them to deliver the same transformative experience to their customers.
                 </p>
-                <div className="mt-6 inline-block bg-[var(--linen)] text-[var(--taupe)] py-2 px-6 rounded-full text-2xl hover:bg-opacity-80">
+                <button className="mt-6 inline-block bg-[var(--linen)] text-[var(--taupe)] py-2 px-6 rounded-full text-2xl hover:bg-opacity-80" onClick={() => document.getElementById("contact")?.scrollIntoView({behavior: "smooth" })}>
                     Contact us to learn more
-                </div>
+                </button>
             </div>
 
             {/* Image for Larger Screens */}
