@@ -2,7 +2,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react"; 
 import { motion } from "framer-motion";
 
 export default function Hero() {
@@ -24,8 +23,8 @@ export default function Hero() {
     }, []);
 
     return (
-    <div className="h-screen flex flex-col md:flex-row mt-20 md:py-0 md:px-20 border-4 border-black">
-        <div className="w-full md:w-2/5 flex flex-col items-center justify-center pt-10  px-10 border-4 border-blue-500">
+    <div className="h-screen flex flex-col md:flex-row mt-20 md:py-0 md:px-20">
+        <div className="w-full md:w-2/5 flex flex-col items-center justify-center pt-10  px-10">
             <h1 className="text-5xl md:text-6xl text-center">
                 Fashion made for you
             </h1>
@@ -36,7 +35,7 @@ export default function Hero() {
                 Try now
             </div>
         </div>
-        <div className="w-full h-100 md:w-3/5 md:h-full flex items-center justify-center border-4 border-green">
+        <div className="w-full h-100 md:w-3/5 md:h-full flex items-center justify-center">
             {/* desktop image */}
             <Image
             src="/hero-thumbnail.png" 
@@ -69,7 +68,7 @@ export default function Hero() {
             </div>
         </div>
         {/* mobile try on button */}
-        <div className="block md:hidden w-full flex justify-center items-center border-4 border-red-300">
+        <div className="block md:hidden w-full flex justify-center items-center">
             <Link href="#try-now" className="inline-block bg-[var(--taupe)] text-white py-2 px-6 rounded-full text-2xl hover:bg-opacity-80">
                 Try now
             </Link>
