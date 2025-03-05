@@ -3,10 +3,10 @@ import Image from "next/image";
 
 export default function ProbSol() {
     return (
-        <div className="flex flex-col items-center w-full min-h-fit bg-[var(--linen)] py-5">
+        <div className="flex flex-col items-center w-full min-h-fit bg-[var(--linen)] py-10">
             
             {/* Problem Section */}
-            <div className="flex flex-col md:flex-row items-center w-full max-w-5xl px-10 md:px-20 gap-8">
+            <div className="flex flex-col md:flex-row items-center w-full max-w-5xl px-10 md:px-10 gap-8">
                 
                 {/* Text Content */}
                 <div className="flex-3 text-center md:text-left p-4">
@@ -20,8 +20,8 @@ export default function ProbSol() {
                     />
                     <p className="text-lg lg:text-xl text-[var(--jet)] font-sans mt-4">
                         Online apparel shopping has a <b>24.4% return rate</b>, costing retailers 
-                        <b> $38 billion</b> annually and contributing to 
-                        <b> 15M+ metric tons</b> of CO₂ emissions!
+                        <b> $38 billion</b> annually and creating overall inefficiencies across the entire industry. Every return means additional shipping, repackaging, and processing, which not only drives up costs but also contributes to
+                        <b> 15M+ metric tons of CO₂ emissions </b> every year!
                     </p>
                 </div>
 

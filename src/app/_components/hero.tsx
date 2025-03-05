@@ -23,7 +23,7 @@ export default function Hero() {
     }, []);
 
     return (
-    <div className="h-screen flex flex-col md:flex-row mt-20 md:py-0 md:px-20">
+    <div id = "home" className="h-screen flex flex-col md:flex-row mt-20 md:py-0 md:px-20">
         <div className="w-full md:w-2/5 flex flex-col items-center justify-center pt-10  px-10">
             <h1 className="text-5xl md:text-6xl text-center">
                 Fashion made for you

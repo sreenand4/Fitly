@@ -3,9 +3,9 @@ import Image from "next/image";
 
 export default function HowItWorks() {
     return (
-        <div className="flex flex-col items-center w-full h-240 md:h-100 px-6 py-10 bg-[var(--taupe)]">
+        <div id="about" className="flex flex-col items-center w-full min-h-fit px-6 py-10 bg-[var(--taupe)]">
             <h1 className="text-5xl md:text-6xl text-[var(--linen)] mb-10">How it works</h1>
-            <div className="flex flex-col md:flex-row w-full max-w-4xl gap-20 md:gap-0">
+            <div className="flex flex-col md:flex-row w-full max-w-4xl gap-20 md:gap-0 mb-10">
                {/* Step 1 */}
                 <div className="w-full lg:w-1/4 h-32 lg:h-full flex flex-col items-center justify-center text-center">
                     <Image 

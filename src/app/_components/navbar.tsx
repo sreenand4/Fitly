@@ -10,11 +10,16 @@
         setIsClient(true);
     }, []);
 
-    const scrollTo = (id : string) => {
-        if (isClient) {
-            document.getElementById(id)?.scrollIntoView({behavior: "smooth"});
+    const scrollTo = (id: string, offset: number = -60) => {
+        if (typeof window !== "undefined") {
+            const element = document.getElementById(id);
+            if (element) {
+                const y = element.getBoundingClientRect().top + window.scrollY + offset;
+                window.scrollTo({ top: y, behavior: "smooth" });
+            }
         }
-    }
+    };
+    
 
     return (
         <nav className="fixed top-0 left-0 w-full bg-[var(--bone)] px-25 flex justify-between items-center z-50">
