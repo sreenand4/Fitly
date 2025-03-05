@@ -32,7 +32,7 @@ export default function Hero() {
                 Visualize how clothes fit your unique body. Simply click, try, and shop with confidence!
             </h3>
             <div  className="mt-6 hidden md:inline-block bg-[var(--taupe)] text-white py-2 px-6 rounded-full text-2xl hover:bg-opacity-80">
-                Try now
+                Coming soon
             </div>
         </div>
         <div className="w-full h-100 md:w-3/5 md:h-full flex items-center justify-center">
@@ -69,9 +69,9 @@ export default function Hero() {
         </div>
         {/* mobile try on button */}
         <div className="block md:hidden w-full flex justify-center items-center">
-            <Link href="#try-now" className="inline-block bg-[var(--taupe)] text-white py-2 px-6 rounded-full text-2xl hover:bg-opacity-80">
-                Try now
-            </Link>
+            <div className="inline-block bg-[var(--taupe)] text-white py-2 px-6 rounded-full text-2xl hover:bg-opacity-80">
+                Coming soon
+            </div>
         </div>
         {/* background image */}
         <Image 

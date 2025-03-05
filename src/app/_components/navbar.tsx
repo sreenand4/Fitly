@@ -27,12 +27,12 @@
                 <li className="cursor-pointer hover:text-[var(--taupe)] py-1" onClick={() => scrollTo("about")}>About Us</li>
                 <li className="cursor-pointer hover:text-[var(--taupe)] py-1" onClick={() => scrollTo("partners")}>For Partners</li>
                 <li className="cursor-pointer hover:text-[var(--taupe)] py-1" onClick={() => scrollTo("contact")}>Contact Us</li>
-                <button 
+                {/* <button 
                     className="hidden md:block bg-[var(--taupe)] text-white px-4 py-1 rounded-full hover:opacity-80"
                     onClick={() => scrollTo("signup")}
                 >
                     Sign Up
-                </button>
+                </button> */}
             </ul>
         </nav>
     )
