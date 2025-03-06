@@ -13,12 +13,11 @@ export async function POST(request) {
       );
     }
 
-    // Configure nodemailer (you'll need to add real credentials)
     const transporter = nodemailer.createTransport({
       service: 'gmail', // or another service
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
+        user: "sreenand6@gmail.com",
+        pass: "deal gkyv mswa uuby",
       },
     });
 
@@ -31,6 +30,7 @@ export async function POST(request) {
       replyTo: email,
       html: `
         <h3>New message from Fitly</h3>
+        <Image src="logo.png" alt="Fitly"/>
         <p><strong>From:</strong> ${email}</p>
         <p><strong>Message:</strong></p>
         <p>${message.replace(/\n/g, '<br>')}</p>
@@ -44,7 +44,7 @@ export async function POST(request) {
   } catch (error) {
     console.error('Error sending email:', error);
     return NextResponse.json(
-      { message: 'Failed to send email' },
+      { message: `Failed to send email: ${error}` },
       { status: 500 }
     );
   }

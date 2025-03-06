@@ -114,11 +114,11 @@ export default function ContactForm() {
                     <textarea 
                         name="message"
                         placeholder="Message" 
-                        className={`w-full md:w-1/2 h-60 px-4 rounded-lg border-2 ${errors.message ? 'border-red-500' : 'border-[var(--taupe)]'} text-xl font-sans p-5`}
+                        className={`w-full md:w-1/2 h-60 rounded-lg border-2 ${errors.message ? 'border-red-500' : 'border-[var(--taupe)]'} text-xl font-sans p-5`}
                         value={formData.message}
                         onChange={handleChange}
                     />
-                    {errors.message && <p className="text-red-500 mt-1">{errors.message}</p>}
+                    {errors.message && <p className="text-red-500 font-sans mt-1">{errors.message}</p>}
                 </div>
 
                 {/* submit message */}
@@ -135,9 +135,9 @@ export default function ContactForm() {
                     disabled={isSubmitting}
                 >
                     {isSubmitting ? (
-                        <span className="text-xl">Sending...</span>
+                        <p className="text-xl">Sending...</p>
                     ) : (
-                        <p className="text-3xl">Send</p>
+                        <p className="text-xl">Send</p>
                     )}
                 </button>
             </form>
