@@ -2,24 +2,96 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { g } from "framer-motion/client";
+
+// Interfaces for garment and catalog data
+interface Garment {
+  id: number;
+  src: string;
+  alt: string;
+  vendor: string;
+  price: string;
+}
+interface CategoryGarments {
+  "Tops": Garment[];
+  "Bottoms": Garment[];
+  "Dresses": Garment[];
+}
+interface Catalog {
+  "Men's": CategoryGarments;
+  "Women's": CategoryGarments;
+}
 
 export default function Demo() {
   const [hasAccess, setHasAccess] = useState<boolean>(false);
   const [code, setCode] = useState<string[]>(Array(6).fill(""));
   const [error, setError] = useState<string>("");
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [gender, setGender] = useState<"Men's" | "Women's">("Women's");
+  const [category, setCategory] = useState<"Tops" | "Bottoms" | "Dresses">("Tops");
+  const [selectedGarment, setSelectedGarment] = useState<string>("");
+
+  // Catalog data
+  const catalog : Catalog = {
+    "Men's": {
+      Tops: [
+        { id: 1, src: "/mens_top1.jpg", alt: "Men's Top 1", vendor: "Abercrombie & Fitch", price: "$45" },
+        { id: 2, src: "/mens_top2.jpg", alt: "Men's Top 2", vendor: "Abercrombie & Fitch", price: "$50" },
+        { id: 3, src: "/mens_top3.jpg", alt: "Men's Top 3", vendor: "Abercrombie & Fitch", price: "$55" },
+        { id: 4, src: "/mens_top4.jpg", alt: "Men's Top 4", vendor: "Abercrombie & Fitch", price: "$45" },
+        { id: 5, src: "/mens_top5.jpg", alt: "Men's Top 5", vendor: "Abercrombie & Fitch", price: "$50" },
+        { id: 6, src: "/mens_top6.jpg", alt: "Men's Top 6", vendor: "Abercrombie & Fitch", price: "$55" },
+      ],
+      Bottoms: [
+        { id: 7, src: "/mens_bottom1.jpg", alt: "Men's Bottom 1", vendor: "Abercrombie & Fitch", price: "$60" },
+        { id: 8, src: "/mens_bottom2.jpg", alt: "Men's Bottom 2", vendor: "Abercrombie & Fitch", price: "$65" },
+        { id: 9, src: "/mens_bottom3.jpg", alt: "Men's Bottom 3", vendor: "Abercrombie & Fitch", price: "$60" },
+        { id: 10, src: "/mens_bottom4.jpg", alt: "Men's Bottom 4", vendor: "Abercrombie & Fitch", price: "$65" },
+        { id: 11, src: "/mens_bottom5.jpg", alt: "Men's Bottom 5", vendor: "Abercrombie & Fitch", price: "$60" },
+        { id: 12, src: "/mens_bottom6.jpg", alt: "Men's Bottom 6", vendor: "Abercrombie & Fitch", price: "$65" },
+      ],
+      Dresses: [],
+    },
+    "Women's": {
+      Tops: [
+        { id: 13, src: "/womens_top1.jpg", alt: "Women's Top 1", vendor: "Abercrombie & Fitch", price: "$40" },
+        { id: 14, src: "/womens_top2.jpg", alt: "Women's Top 2", vendor: "Abercrombie & Fitch",  price: "$45" },
+        { id: 15, src: "/womens_top3.jpg", alt: "Women's Top 3", vendor: "Abercrombie & Fitch", price: "$40" },
+        { id: 16, src: "/womens_top4.jpg", alt: "Women's Top 4", vendor: "Abercrombie & Fitch",  price: "$45" },
+        { id: 17, src: "/womens_top5.jpg", alt: "Women's Top 5", vendor: "Abercrombie & Fitch", price: "$40" },
+        { id: 18, src: "/womens_top6.jpg", alt: "Women's Top 6", vendor: "Abercrombie & Fitch",  price: "$45" },
+      ],
+      Bottoms: [
+        { id: 19, src: "/womens_bottom1.jpg", alt: "Women's Bottom 1", vendor: "Abercrombie & Fitch", price: "$50" },
+        { id: 20, src: "/womens_bottom2.jpg", alt: "Women's Bottom 2", vendor: "Abercrombie & Fitch", price: "$50" },
+        { id: 21, src: "/womens_bottom3.jpg", alt: "Women's Bottom 3", vendor: "Abercrombie & Fitch", price: "$50" },
+        { id: 22, src: "/womens_bottom4.jpg", alt: "Women's Bottom 4", vendor: "Abercrombie & Fitch", price: "$50" },
+        { id: 23, src: "/womens_bottom5.jpg", alt: "Women's Bottom 5", vendor: "Abercrombie & Fitch", price: "$50" },
+        { id: 24, src: "/womens_bottom6.jpg", alt: "Women's Bottom 6", vendor: "Abercrombie & Fitch", price: "$50" },
+      ],
+      Dresses: [
+        { id: 25, src: "/womens_dress1.jpg", alt: "Women's Dress 1", vendor: "Abercrombie & Fitch", price: "$70" },
+        { id: 26, src: "/womens_dress2.jpg", alt: "Women's Dress 2", vendor: "Abercrombie & Fitch", price: "$75" },
+        { id: 27, src: "/womens_dress3.jpg", alt: "Women's Dress 3", vendor: "Abercrombie & Fitch", price: "$70" },
+        { id: 28, src: "/womens_dress4.jpg", alt: "Women's Dress 4", vendor: "Abercrombie & Fitch", price: "$75" },
+        { id: 29, src: "/womens_dress5.jpg", alt: "Women's Dress 5", vendor: "Abercrombie & Fitch", price: "$70" },
+        { id: 30, src: "/womens_dress6.jpg", alt: "Women's Dress 6", vendor: "Abercrombie & Fitch", price: "$75" },
+      ],
+    },
+  };
 
   useEffect(() => {
     const storedAccess = localStorage.getItem("fitly_demo_access");
-    if (storedAccess === "true") {
-      setHasAccess(true); // Fixed the logic here (was setting to false)
+    const storedCode = localStorage.getItem("fitly_demo_code");
+    if (storedAccess === "true" && storedCode) {
+      setHasAccess(true);
+      setCode(storedCode.split(""));
     }
   }, []);
 
   const handleChange = (index: number, value: string) => {
-    // On mobile: only allow numbers, on desktop: allow alphanumeric
-    const isMobile = window.innerWidth < 768;
-    const pattern = isMobile ? /^[0-9]?$/ : /^[A-Za-z0-9]?$/;
+    const pattern = /^[A-Za-z0-9]?$/;
     if (!pattern.test(value)) return;
     
     const newCode = [...code];
@@ -56,21 +128,51 @@ export default function Demo() {
     if (enteredCode === "123456") {
       setHasAccess(true);
       localStorage.setItem("fitly_demo_access", "true");
+      localStorage.setItem("fitly_demo_code", code.join(""));
     } else {
       setError("Invalid Access Code");
     }
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ["image/jpeg", "image/png"];
+    if (!validTypes.includes(file.type)) {
+      alert("Please upload a JPEG or PNG image.");
+      return;
+    }
+
+    // Validate file size (e.g., max 5MB)
+    const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSizeInBytes) {
+      alert("File size exceeds 5MB. Please upload a smaller image.");
+      return;
+    }
+
+    // Read and display the image
+    const reader = new FileReader();
+    reader.onload = () => {
+      setUploadedImage(reader.result as string);
+    };
+    reader.onerror = () => {
+      alert("Error reading the file. Please try again.");
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
     <div className="w-screen h-screen flex flex-col md:flex-row justify-center">
       {!hasAccess ? (
         <>
-          {/* Left side - hidden on mobile */}
+          {/* Left side */}
           <div className="hidden md:flex md:flex-1 bg-[var(--taupe)] items-center justify-center px-10 rounded-br-[60px]">
             <Image src="/logo_light.png" alt="FITLY" width={250} height={500} />
           </div>
 
-          {/* Right side - centered on mobile */}
+          {/* Right side */}
           <div className="w-full md:flex-1 flex flex-col justify-center items-center md:items-start px-4 md:px-20 py-8">
             <h2 className="text-[var(--jet)] text-4xl md:text-6xl">Access Code</h2>
             <p className="text-[var(--jet)] text-sm mb-6 font-sans text-center">
@@ -96,8 +198,7 @@ export default function Demo() {
             {/* Submit Button */}
             <button
               className="bg-[var(--taupe)] w-full max-w-xs md:w-2/3 text-white px-6 py-2 md:py-1 rounded-full text-lg md:text-xl hover:bg-[#4A362A] transition"
-              onClick={handleSubmit}
-            >
+              onClick={handleSubmit}>
               Continue
             </button>
 
@@ -108,8 +209,107 @@ export default function Demo() {
           </div>
         </>
       ) : (
-        <div className="w-full h-full flex items-center justify-center">
-          <h1 className="text-4xl text-[var(--jet)]">Access Granted</h1>
+        // Fitting Room
+        <div className="w-full h-full flex flex-col mt-30 sm:mt-20 gap-10 px-10 md:px-20">
+          {/* Header */}
+          <div className="flex flex-row items-end border-b-2 border-[var(--taupe)]] justify-between pt-10 pb-1">
+            <div className="flex flex-col">
+              <p className="font-sans">Welcome to the</p>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl">Fitting Room</h1>
+            </div>
+            <div className="flex flex-col items-end">
+              <h1 className="text-xs sm:text-md lg:text-lg font-sans">Session code: {code.join("")}</h1>
+              <h1 className="text-xs sm:text-md lg:text-lg font-bold font-sans">Expires in 2 Days</h1>
+            </div>
+          </div>
+
+          {/* Body */}
+          <div className="flex flex-1 flex-col lg:flex-row gap-6">
+            {/* Upload section */}
+            <div className="flex-1 h-fit relative bg-[var(--bone)] rounded-xl pt-5 pb-10 px-5">
+              <h2 className="text-xl mb-2 font-sans text-center font-bold">Upload your picture</h2>
+              <div className="flex-1 relative pb-10 px-5">
+                {uploadedImage ? (
+                  <div className="relative">
+                    <Image
+                      src={uploadedImage}
+                      alt="Uploaded Image"
+                      width={512}
+                      height={512}
+                      className="rounded-lg"
+                    />
+                    <button onClick={() => setUploadedImage(null)} className="absolute top-2 right-2 px-3 py-1 bg-[var(--taupe)] rounded-full text-white font-sans">x</button>
+                  </div>
+                ) : (
+                  <>
+                    <p className="font-sans mb-2 text-center underline">Guidelines:</p>
+                    <ul className="list-disc pl-5 space-y-2 font-sans text-sm text-center">
+                      <li>Simple pose</li>
+                      <li>Clear solo photo</li>
+                      <li>Unobstructed face</li>
+                      <li>Subject is at least 5-6 feet from the camera</li>
+                      <li>Portrait oriented with width = 512px and length = 4096px</li>
+                    </ul>
+                  </>
+                )}
+              </div>
+              <label className="absolute bottom-6 left-1/2 -translate-x-1/2 w-4/5 cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                <div className="bg-[var(--jet)] text-white font-sans px-6 py-2 rounded-full w-full flex items-center justify-center gap-2 mouse-pointer whitespace-nowrap text-sm min-w-0">
+                  <span className="text-md">↑</span> Upload
+                </div>
+              </label>
+            </div>
+
+            {/* Catalogue */}
+            <div className="flex flex-col flex-2 h-fit relative bg-[var(--bone)] rounded-xl pt-5 pb-10 px-5 items-center">
+                <h2 className="text-xl font-sans text-center font-bold">Browse our catalouge</h2>
+                {/* selection container */}
+                <div className="flex flex-row items-center justify-center gap-10 w-full py-2 font-sans">
+                  <select value={gender} onChange={(e) => setGender(e.target.value as "Men's" | "Women's")} className="">
+                    <option value={"Men's"}>Men's</option>
+                    <option value={"Women's"}>Women's</option>
+                  </select>
+                  <select value={category} onChange={(e) => setCategory(e.target.value as "Tops" | "Bottoms" | "Dresses")} className="">
+                    <option value={"Tops"}>Tops</option>
+                    <option value={"Bottoms"}>Bottoms</option>
+                    <option value={"Dresses"}>Dresses</option>
+                  </select>
+                </div>
+
+                {/* Garment selection */}
+                <div className="flex flex-wrap justify-center gap-8 w-full mt-4 px-5 pb-10">
+                  {catalog[gender][category].map((garment: Garment) => (
+                    <div key={garment.id} onClick={() => {selectedGarment === garment.src ? setSelectedGarment("") : setSelectedGarment(garment.src)}} className="relative cursor-pointer rounded-xl font-sans">
+                      <Image src={garment.src} alt={garment.alt} width={150} height={200} className="object-cover"/>
+                      {selectedGarment && selectedGarment === garment.src && (
+                        <div className="absolute inset-0 border-2 border-[var(--taupe)] rounded-xl"/>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* try on button */}
+                <button
+                  className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-[var(--taupe)] w-4/5 text-white px-6 py-1 rounded-full text-lg md:text-xl transition ${!(selectedGarment && uploadedImage) ? "opacity-50 cursor-not-allowed" : ""}`}
+                  disabled={!selectedGarment}
+                  onClick={() => alert("Trying on " + selectedGarment)}>
+                  Try on
+                </button>
+            </div>
+
+            {/* Try-on section */}
+            <div className="flex-1">
+              <div className="h-4/5 mb-4 flex-1 p-5 bg-[var(--bone)] rounded-xl">
+                <h2 className="text-xl mb-2 font-sans font-bold text-center">Try on</h2>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -34,8 +34,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "src/api/send-email/route.js",
-    "src/_components/contactForm.jsx",
-    "src/_components/contactForm.jsx",
+    "src/components/contactForm.jsx",
+    "src/components/contactForm.jsx",
     "src/api/send-email/route.jsx"
   ],
   "exclude": [
