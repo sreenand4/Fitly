@@ -18,6 +18,7 @@ const eslintConfig = [
       "@typescript-eslint/no-unused-vars": ["warn"], // Change this to "off" to disable entirely
       "prefer-const": "off",
       'react/no-unescaped-entities': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off'
     },
   }
 
