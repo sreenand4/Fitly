@@ -125,7 +125,7 @@ export default function Demo() {
   const handleSubmit = () => {
     const enteredCode = code.join("");
     setError("");
-    if (enteredCode === "demody") {
+    if (enteredCode === "123456") {
       setHasAccess(true);
       localStorage.setItem("fitly_demo_access", "true");
       localStorage.setItem("fitly_demo_code", code.join(""));
