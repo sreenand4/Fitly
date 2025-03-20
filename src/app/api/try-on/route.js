@@ -26,7 +26,6 @@ export async function POST(req) {
         console.log("Entering try block");
         // validate the request body
         const { human_image, cloth_image } = await req.json();
-        console.log("Request body:", { human_image, cloth_image });
         if (!human_image || !cloth_image) {
             return NextResponse.json({ error: "Missing human_image or cloth_image" }, { status: 400 });
         }
