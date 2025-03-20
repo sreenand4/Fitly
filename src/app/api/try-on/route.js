@@ -5,7 +5,7 @@ import https from "https";
 
 const ACCESS_KEY = '49468eee639e46c3acfe0936c88e2cee';
 const SECRET_KEY = '3380fc8ab2f64b3287bdcff34375f932';
-const KLING_API_URL = 'https://api.klingai.com/v1/images/kolors-virtual-try-on';
+const KLING_API_URL = 'https://api.klingai.com/v1/images/kolors-virtual-try-on'
 
 function generateJwtToken() {
     const header = {
