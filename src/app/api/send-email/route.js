@@ -14,14 +14,13 @@ export async function POST(request) {
     }
 
     const transporter = nodemailer.createTransport({
-      service: 'gmail', // or another service
+      service: 'gmail',
       auth: {
         user: "sreenand6@gmail.com",
         pass: "deal gkyv mswa uuby",
       },
     });
 
-    // Email options
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: to,
@@ -30,7 +29,7 @@ export async function POST(request) {
       replyTo: email,
       html: `
         <h3>New message from Fitly</h3>
-        <Image src="logo.png" alt="Fitly"/>
+        <Image src="/logo.png" alt="Fitly" width={150} height={100}/>
         <p><strong>From:</strong> ${email}</p>
         <p><strong>Message:</strong></p>
         <p>${message.replace(/\n/g, '<br>')}</p>
@@ -41,8 +40,10 @@ export async function POST(request) {
     await transporter.sendMail(mailOptions);
 
     return NextResponse.json({ message: 'Email sent successfully' });
+
   } catch (error) {
     console.error('Error sending email:', error);
+
     return NextResponse.json(
       { message: `Failed to send email: ${error}` },
       { status: 500 }
