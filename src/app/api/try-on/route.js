@@ -22,7 +22,6 @@ function generateJwtToken() {
 
 // POST /api/try-on to send the request to KLING
 export async function POST(req) {
-    console.log("POST request received at /api/try-on");
     try {
         console.log("Entering try block");
         // validate the request body
