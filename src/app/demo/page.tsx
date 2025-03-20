@@ -38,8 +38,8 @@ export default function Demo() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [tryOnResult, setTryOnResult] = useState<string | null>(null);
   // Access codes expiration
-  const [currentTime, setCurrentTime] = useState<any>(new Date());
-  const expirationTime : any = new Date('2025-03-20T20:30:00');
+  const [currentTime, setCurrentTime] = useState<Date>(new Date());
+  const expirationTime : Date = new Date('2025-03-20T20:30:00');
 
   // Update current time every second
   useEffect(() => {
@@ -49,7 +49,7 @@ export default function Demo() {
     return () => clearInterval(timer);
   }, []);
   const getTimeRemaining = () => {
-    const diffMs = expirationTime - currentTime;
+    const diffMs = expirationTime.getTime() - currentTime.getTime();
     if (diffMs <= 0) return "Expired";
     const diffSeconds = Math.floor(diffMs / 1000);
     const days = Math.floor(diffSeconds / (3600 * 24));
