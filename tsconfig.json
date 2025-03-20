@@ -33,10 +33,10 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/api/send-email/route.js",
+    "src/app/api/send-email/route.js",
     "src/components/contactForm.jsx",
     "src/components/contactForm.jsx",
-    "src/api/send-email/route.jsx"
+    "src/app/api/send-email/route.jsx"
   ],
   "exclude": [
     "node_modules"

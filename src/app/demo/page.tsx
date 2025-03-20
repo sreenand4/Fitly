@@ -2,7 +2,6 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { g } from "framer-motion/client";
 
 // Interfaces for garment and catalog data
 interface Garment {
@@ -23,61 +22,62 @@ interface Catalog {
 }
 
 export default function Demo() {
+  // access code states
   const [hasAccess, setHasAccess] = useState<boolean>(false);
   const [code, setCode] = useState<string[]>(Array(6).fill(""));
   const [error, setError] = useState<string>("");
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  // fitting room states
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [gender, setGender] = useState<"Men's" | "Women's">("Women's");
+  const [gender, setGender] = useState<"Men's" | "Women's">("Men's");
   const [category, setCategory] = useState<"Tops" | "Bottoms" | "Dresses">("Tops");
-  const [selectedGarment, setSelectedGarment] = useState<string>("");
+  const [selectedGarment, setSelectedGarment] = useState<Garment | null>(null);
+  // try-on states
+  const [taskId, setTaskId] = useState<string | null>(null);
+  const [taskStatus, setTaskStatus] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [tryOnResult, setTryOnResult] = useState<string | null>(null);
+  // Access codes expiration
+  const [currentTime, setCurrentTime] = useState<any>(new Date());
+  const expirationTime : any = new Date('2025-03-20T20:30:00');
+
+  // Update current time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+  const getTimeRemaining = () => {
+    const diffMs = expirationTime - currentTime;
+    if (diffMs <= 0) return "Expired";
+    const diffSeconds = Math.floor(diffMs / 1000);
+    const days = Math.floor(diffSeconds / (3600 * 24));
+    const hours = Math.floor((diffSeconds % (3600 * 24)) / 3600);
+    const minutes = Math.floor((diffSeconds % 3600) / 60);
+    const seconds = diffSeconds % 60;
+    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+  };
 
   // Catalog data
   const catalog : Catalog = {
     "Men's": {
       Tops: [
-        { id: 1, src: "/mens_top1.jpg", alt: "Men's Top 1", vendor: "Abercrombie & Fitch", price: "$45" },
-        { id: 2, src: "/mens_top2.jpg", alt: "Men's Top 2", vendor: "Abercrombie & Fitch", price: "$50" },
-        { id: 3, src: "/mens_top3.jpg", alt: "Men's Top 3", vendor: "Abercrombie & Fitch", price: "$55" },
-        { id: 4, src: "/mens_top4.jpg", alt: "Men's Top 4", vendor: "Abercrombie & Fitch", price: "$45" },
-        { id: 5, src: "/mens_top5.jpg", alt: "Men's Top 5", vendor: "Abercrombie & Fitch", price: "$50" },
-        { id: 6, src: "/mens_top6.jpg", alt: "Men's Top 6", vendor: "Abercrombie & Fitch", price: "$55" },
+        { id: 1, src: "/mens_top1.png", alt: "Men's Top 1", vendor: "Abercrombie & Fitch", price: "$45" },
+        { id: 2, src: "/mens_top2.png", alt: "Men's Top 2", vendor: "Abercrombie & Fitch", price: "$50" },
+        { id: 3, src: "/mens_top3.png", alt: "Men's Top 3", vendor: "Abercrombie & Fitch", price: "$55" },
       ],
-      Bottoms: [
-        { id: 7, src: "/mens_bottom1.jpg", alt: "Men's Bottom 1", vendor: "Abercrombie & Fitch", price: "$60" },
-        { id: 8, src: "/mens_bottom2.jpg", alt: "Men's Bottom 2", vendor: "Abercrombie & Fitch", price: "$65" },
-        { id: 9, src: "/mens_bottom3.jpg", alt: "Men's Bottom 3", vendor: "Abercrombie & Fitch", price: "$60" },
-        { id: 10, src: "/mens_bottom4.jpg", alt: "Men's Bottom 4", vendor: "Abercrombie & Fitch", price: "$65" },
-        { id: 11, src: "/mens_bottom5.jpg", alt: "Men's Bottom 5", vendor: "Abercrombie & Fitch", price: "$60" },
-        { id: 12, src: "/mens_bottom6.jpg", alt: "Men's Bottom 6", vendor: "Abercrombie & Fitch", price: "$65" },
-      ],
+      Bottoms: [],
       Dresses: [],
     },
     "Women's": {
       Tops: [
-        { id: 13, src: "/womens_top1.jpg", alt: "Women's Top 1", vendor: "Abercrombie & Fitch", price: "$40" },
-        { id: 14, src: "/womens_top2.jpg", alt: "Women's Top 2", vendor: "Abercrombie & Fitch",  price: "$45" },
-        { id: 15, src: "/womens_top3.jpg", alt: "Women's Top 3", vendor: "Abercrombie & Fitch", price: "$40" },
-        { id: 16, src: "/womens_top4.jpg", alt: "Women's Top 4", vendor: "Abercrombie & Fitch",  price: "$45" },
-        { id: 17, src: "/womens_top5.jpg", alt: "Women's Top 5", vendor: "Abercrombie & Fitch", price: "$40" },
-        { id: 18, src: "/womens_top6.jpg", alt: "Women's Top 6", vendor: "Abercrombie & Fitch",  price: "$45" },
+        { id: 13, src: "/womens_top1.png", alt: "Women's Top 1", vendor: "Abercrombie & Fitch", price: "$40" },
+        { id: 14, src: "/womens_top2.png", alt: "Women's Top 2", vendor: "Abercrombie & Fitch",  price: "$45" },
+        { id: 15, src: "/womens_top3.png", alt: "Women's Top 3", vendor: "Abercrombie & Fitch", price: "$40" },
       ],
-      Bottoms: [
-        { id: 19, src: "/womens_bottom1.jpg", alt: "Women's Bottom 1", vendor: "Abercrombie & Fitch", price: "$50" },
-        { id: 20, src: "/womens_bottom2.jpg", alt: "Women's Bottom 2", vendor: "Abercrombie & Fitch", price: "$50" },
-        { id: 21, src: "/womens_bottom3.jpg", alt: "Women's Bottom 3", vendor: "Abercrombie & Fitch", price: "$50" },
-        { id: 22, src: "/womens_bottom4.jpg", alt: "Women's Bottom 4", vendor: "Abercrombie & Fitch", price: "$50" },
-        { id: 23, src: "/womens_bottom5.jpg", alt: "Women's Bottom 5", vendor: "Abercrombie & Fitch", price: "$50" },
-        { id: 24, src: "/womens_bottom6.jpg", alt: "Women's Bottom 6", vendor: "Abercrombie & Fitch", price: "$50" },
-      ],
-      Dresses: [
-        { id: 25, src: "/womens_dress1.jpg", alt: "Women's Dress 1", vendor: "Abercrombie & Fitch", price: "$70" },
-        { id: 26, src: "/womens_dress2.jpg", alt: "Women's Dress 2", vendor: "Abercrombie & Fitch", price: "$75" },
-        { id: 27, src: "/womens_dress3.jpg", alt: "Women's Dress 3", vendor: "Abercrombie & Fitch", price: "$70" },
-        { id: 28, src: "/womens_dress4.jpg", alt: "Women's Dress 4", vendor: "Abercrombie & Fitch", price: "$75" },
-        { id: 29, src: "/womens_dress5.jpg", alt: "Women's Dress 5", vendor: "Abercrombie & Fitch", price: "$70" },
-        { id: 30, src: "/womens_dress6.jpg", alt: "Women's Dress 6", vendor: "Abercrombie & Fitch", price: "$75" },
-      ],
+      Bottoms: [],
+      Dresses: [],
     },
   };
 
@@ -163,6 +163,90 @@ export default function Demo() {
     reader.readAsDataURL(file);
   };
 
+  const getBase64Url = async (url: string): Promise<string> => {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
+  const handleTryOn = async () => {
+    // validate inputs
+    if (!uploadedImage || !selectedGarment) return;
+    // reset states
+    setIsProcessing(true);
+    setTaskId(null);
+    setTryOnResult(null);
+    setTaskStatus(null);
+
+    try {
+      // convert images to pure base64
+      const base64HumanImage = uploadedImage.split(",")[1];
+      const garmentUrl = `/Garments${selectedGarment.src}`;
+      const base64GarmentImageFull = await getBase64Url(garmentUrl);
+      const base64GarmentImage = base64GarmentImageFull.split(",")[1];
+      // make call to /api/try-on
+      const response = await fetch("/api/try-on", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          human_image: base64HumanImage,
+          cloth_image: base64GarmentImage,
+        }),
+      });
+      // Gather result
+      const result = await response.json();
+      console.log("RESULT FROM /api/try-on: ", result);
+      if (response.ok) {
+        setTaskId(result.taskId);
+        setTaskStatus(result.taskStatus);
+      } else {
+        throw new Error(result.error || "Failed to contact /api/try-on");
+      }
+    } catch (error) {
+      console.error("Error trying to contact /api/try-on", error);
+      alert("Failed to process try-on request, please try again.");
+      setIsProcessing(false);
+    }
+  };
+
+  // Polling for result
+  useEffect(() => {
+    if (!taskId || tryOnResult) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/try-on-callback?taskId=${taskId}`);
+        // we are still waiting for inital callback from KLING
+        if (!response.ok) {
+          console.error("Callback responded with: ", response.status);
+        }
+        const data = await response.json();
+        console.log("Polling result: ", data);
+        setTaskStatus(data.status || null);
+        if (data.status === "succeed" && data.result) {
+          setTryOnResult(data.result);
+          setIsProcessing(false);
+          clearInterval(interval);
+        } else if (data.status === "failed") {
+          setIsProcessing(false);
+          clearInterval(interval);
+        } else if (data.error) {
+          // task not found yet, keep polling
+          console.log("Task not found yet, continuing to poll...");
+        }
+      } catch (error) {
+        console.error("Error polling task status:", error);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [taskId, tryOnResult]);
+
   return (
     <div className="w-screen h-screen flex flex-col md:flex-row justify-center">
       {!hasAccess ? (
@@ -219,14 +303,16 @@ export default function Demo() {
             </div>
             <div className="flex flex-col items-end">
               <h1 className="text-xs sm:text-md lg:text-lg font-sans">Session code: {code.join("")}</h1>
-              <h1 className="text-xs sm:text-md lg:text-lg font-bold font-sans">Expires in 2 Days</h1>
+              <h1 className={`text-xs sm:text-md lg:text-lg font-bold font-sans ${currentTime > expirationTime ? 'text-red-800' : 'text-[var(--jet)]'}`}>
+                {currentTime > expirationTime ? "Expired" : `Expires in ${getTimeRemaining()}`}
+              </h1>
             </div>
           </div>
 
           {/* Body */}
           <div className="flex flex-1 flex-col lg:flex-row gap-6">
             {/* Upload section */}
-            <div className="flex-1 h-fit relative bg-[var(--bone)] rounded-xl pt-5 pb-10 px-5">
+            <div className="flex-1 h-fit relative bg-[var(--bone)] rounded-xl pt-5 pb-10 px-5 justify-center items-center">
               <h2 className="text-xl mb-2 font-sans text-center font-bold">Upload your picture</h2>
               <div className="flex-1 relative pb-10 px-5">
                 {uploadedImage ? (
@@ -238,7 +324,7 @@ export default function Demo() {
                       height={512}
                       className="rounded-lg"
                     />
-                    <button onClick={() => setUploadedImage(null)} className="absolute top-2 right-2 px-3 py-1 bg-[var(--taupe)] rounded-full text-white font-sans">x</button>
+                    <button onClick={() => setUploadedImage(null)} className="absolute top-2 right-2 px-3 py-1 bg-[var(--taupe)] rounded-full text-white font-sans z-15">x</button>
                   </div>
                 ) : (
                   <>
@@ -253,11 +339,12 @@ export default function Demo() {
                   </>
                 )}
               </div>
-              <label className="absolute bottom-6 left-1/2 -translate-x-1/2 w-4/5 cursor-pointer">
+              <label className={`absolute bottom-6 left-1/2 -translate-x-1/2 w-4/5 ${currentTime > expirationTime ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
                 <input
                   type="file"
                   accept="image/jpeg,image/png"
                   onChange={handleImageUpload}
+                  disabled={currentTime > expirationTime}
                   className="hidden"
                 />
                 <div className="bg-[var(--jet)] text-white font-sans px-6 py-2 rounded-full w-full flex items-center justify-center gap-2 mouse-pointer whitespace-nowrap text-sm min-w-0">
@@ -285,9 +372,9 @@ export default function Demo() {
                 {/* Garment selection */}
                 <div className="flex flex-wrap justify-center gap-8 w-full mt-4 px-5 pb-10">
                   {catalog[gender][category].map((garment: Garment) => (
-                    <div key={garment.id} onClick={() => {selectedGarment === garment.src ? setSelectedGarment("") : setSelectedGarment(garment.src)}} className="relative cursor-pointer rounded-xl font-sans">
-                      <Image src={garment.src} alt={garment.alt} width={150} height={200} className="object-cover"/>
-                      {selectedGarment && selectedGarment === garment.src && (
+                    <div key={garment.id} onClick={() => {selectedGarment?.src === garment.src ? setSelectedGarment(null) : setSelectedGarment(garment)}} className="relative flex items-center cursor-pointer rounded-xl font-sans">
+                      <Image src={`/Garments${garment.src}`} alt={garment.alt} width={155} height={150} className="object-fit rounded-xl"/>
+                      {selectedGarment && selectedGarment?.src === garment.src && (
                         <div className="absolute inset-0 border-2 border-[var(--taupe)] rounded-xl"/>
                       )}
                     </div>
@@ -297,17 +384,32 @@ export default function Demo() {
                 {/* try on button */}
                 <button
                   className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-[var(--taupe)] w-4/5 text-white px-6 py-1 rounded-full text-lg md:text-xl transition ${!(selectedGarment && uploadedImage) ? "opacity-50 cursor-not-allowed" : ""}`}
-                  disabled={!selectedGarment}
-                  onClick={() => alert("Trying on " + selectedGarment)}>
-                  Try on
+                  disabled={!selectedGarment || !uploadedImage || isProcessing}
+                  onClick={handleTryOn}>
+                  {isProcessing ? 'Processing...' : 'Try on'}
                 </button>
             </div>
 
             {/* Try-on section */}
-            <div className="flex-1">
-              <div className="h-4/5 mb-4 flex-1 p-5 bg-[var(--bone)] rounded-xl">
-                <h2 className="text-xl mb-2 font-sans font-bold text-center">Try on</h2>
-              </div>
+            <div className="flex flex-col h-4/5 mb-4 flex-1 p-5 bg-[var(--bone)] rounded-xl items-center">
+              <h2 className="text-xl mb-2 font-sans font-bold text-center">Try on</h2>
+              {isProcessing || taskStatus === "submitted" || taskStatus === "processing" ? (
+                <>
+                  
+                  <div className="relative flex h-12 w-12 mt-20 mb-20">
+                    <div className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--taupe)]"></div>
+                    <div className="animate-ping absolute inline-flex h-12 w-12 rounded-full bg-black-600"></div>
+                  </div>
+                  <p className="text-center font-sans">Processing...</p>
+                </>
+                
+              ) : tryOnResult ? (
+                <Image src={tryOnResult} alt="Try-On Result" width={512} height={512} className="rounded-xl mx-auto" />
+              ) : taskStatus === "failed" ? (
+                <p className="text-center font-sans font-red-800">Try-on failed, please try again</p>
+              ) : (
+                <p className="text-center font-sans">No result to show yet</p>
+              )}
             </div>
           </div>
         </div>
