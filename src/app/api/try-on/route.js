@@ -40,7 +40,8 @@ export async function POST(req) {
         };
         const httpsAgent = new https.Agent({
             rejectUnauthorized: true,
-            secureProtocol: "TLSv1_2_method",
+            minVersion: "TLSv1.2",
+            maxVersion: "TLSv1.3",
         });
         // send the request to KLING
         const response = await axios.post(KLING_API_URL, requestBody, {
@@ -48,7 +49,7 @@ export async function POST(req) {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`,
             },
-            httpsAgent,
+            httpsAgent: httpsAgent,
         })
         console.log("RESPONSE FROM KLING: ", response.data);
         // collect the response

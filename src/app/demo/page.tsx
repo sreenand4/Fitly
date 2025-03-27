@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
 import Image from "next/image";
 
 // Interfaces for garment and catalog data
@@ -39,7 +38,7 @@ export default function Demo() {
   const [tryOnResult, setTryOnResult] = useState<string | null>(null);
   // Access codes expiration
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
-  const expirationTime : Date = new Date('2025-03-20T20:30:00');
+  const expirationTime : Date = new Date('2025-03-27T20:30:00');
 
   // Update current time every second
   useEffect(() => {
