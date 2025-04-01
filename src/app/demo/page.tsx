@@ -38,7 +38,7 @@ export default function Demo() {
   const [tryOnResult, setTryOnResult] = useState<string | null>(null);
   // Access codes expiration
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
-  const expirationTime : Date = new Date('2025-03-27T20:30:00');
+  const expirationTime : Date = new Date('2025-05-27T20:30:00');
 
   // Update current time every second
   useEffect(() => {
@@ -124,7 +124,7 @@ export default function Demo() {
   const handleSubmit = () => {
     const enteredCode = code.join("");
     setError("");
-    if (enteredCode === "123456") {
+    if (enteredCode === "314315") {
       setHasAccess(true);
       localStorage.setItem("fitly_demo_access", "true");
       localStorage.setItem("fitly_demo_code", code.join(""));
