@@ -39,8 +39,6 @@ export default function ContactForm() {
         // Message validation
         if (!formData.message) {
             newErrors.message = "Message is required";
-        } else if (formData.message.trim().length < 10) {
-            newErrors.message = "Message must be at least 10 characters";
         }
         
         setErrors(newErrors);

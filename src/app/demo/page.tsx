@@ -19,6 +19,12 @@ interface Catalog {
   "Men's": CategoryGarments;
   "Women's": CategoryGarments;
 }
+interface FormData {
+  email: string;
+  message: string;
+} 
+
+
 
 export default function Demo() {
   // access code states
@@ -39,6 +45,11 @@ export default function Demo() {
   // Access codes expiration
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const expirationTime : Date = new Date('2025-05-27T20:30:00');
+  // Form data states
+  const [formData, setFormData] = useState<FormData>({
+    email: "",
+    message: ""
+  });
 
   // Update current time every second
   useEffect(() => {
@@ -65,6 +76,7 @@ export default function Demo() {
         { id: 1, src: "/mens_top1.png", alt: "Men's Top 1", vendor: "Abercrombie & Fitch", price: "$45" },
         { id: 2, src: "/mens_top2.png", alt: "Men's Top 2", vendor: "Abercrombie & Fitch", price: "$50" },
         { id: 3, src: "/mens_top3.png", alt: "Men's Top 3", vendor: "Abercrombie & Fitch", price: "$55" },
+        { id: 4, src: "/mens_top4.png", alt: "Men's Top 4", vendor: "Abercrombie & Fitch", price: "$55" },
       ],
       Bottoms: [],
       Dresses: [],
@@ -189,7 +201,7 @@ export default function Demo() {
       const base64GarmentImageFull = await getBase64Url(garmentUrl);
       const base64GarmentImage = base64GarmentImageFull.split(",")[1];
       // make call to /api/try-on
-      const response = await fetch("/api/try-on", {
+      const response = await fetch("../api/try-on", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -213,36 +225,69 @@ export default function Demo() {
     }
   };
 
+  // Submit email confirmation to me
+  const emailConfirmation = async (result: string) => {
+    try {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: "sreenand6@gmail.com",
+          message: result,
+          to: "sreenand6@gmail.com",
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        console.log("Email confirmation sent successfully");
+      } else {
+        console.error("Failed to send email confirmation:", data.message || "Unknown error");
+      }
+    } catch (error) {
+      console.error("Confirmation submission error:", error);
+    }
+  };
+
   // Polling for result
   useEffect(() => {
     if (!taskId || tryOnResult) return;
-
+  
     const interval = setInterval(async () => {
       try {
         const response = await fetch(`/api/try-on-callback?taskId=${taskId}`);
-        // we are still waiting for inital callback from KLING
         if (!response.ok) {
           console.error("Callback responded with: ", response.status);
         }
         const data = await response.json();
         console.log("Polling result: ", data);
+        
+        // Update task status
         setTaskStatus(data.status || null);
+  
         if (data.status === "succeed" && data.result) {
+          // Set the result and stop processing
           setTryOnResult(data.result);
           setIsProcessing(false);
-          clearInterval(interval);
+          
+          // Send email with the result
+          await emailConfirmation(data.result); // Call email function with the result directly
+          
+          clearInterval(interval); // Stop polling
         } else if (data.status === "failed") {
           setIsProcessing(false);
-          clearInterval(interval);
+          clearInterval(interval); // Stop polling on failure
         } else if (data.error) {
-          // task not found yet, keep polling
           console.log("Task not found yet, continuing to poll...");
         }
       } catch (error) {
         console.error("Error polling task status:", error);
       }
     }, 5000);
-
+  
     return () => clearInterval(interval);
   }, [taskId, tryOnResult]);
 
