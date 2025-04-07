@@ -14,14 +14,12 @@
   --foreground: #171717;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --linen: #f8ede2;
-    --jet: #2b2b2b;
-    --taupe: #564033;
-    --sienna: #de6854;
-    --bone: #ded1c2;
-  }
+:root {
+  --linen: #f8ede2;
+  --jet: #2b2b2b;
+  --taupe: #564033;
+  --sienna: #de6854;
+  --bone: #ded1c2;
 }
 
 body {
