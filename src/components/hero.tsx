@@ -31,7 +31,7 @@ export default function Hero() {
             <h3 className="mt-4 md:px-0 text-lg md:text-xl lg:text-2xl font-sans text-center">
                 Visualize how clothes fit your unique body. Simply click, try, and shop with confidence!
             </h3>
-            <Link href="/demo" className="mt-6 hidden md:inline-block bg-[var(--taupe)] text-white py-2 px-6 rounded-full text-2xl hover:bg-opacity-80">
+            <Link href="/fittingroom" className="mt-6 hidden md:inline-block bg-[var(--taupe)] text-white py-2 px-6 rounded-full text-2xl hover:bg-opacity-80">
             Try Demo
             </Link>
         </div>
@@ -69,7 +69,7 @@ export default function Hero() {
         </div>
         {/* mobile try on button */}
         <div className="block md:hidden w-full flex justify-center items-center">
-            <Link href={'/demo'} className="inline-block bg-[var(--taupe)] text-white py-2 px-6 rounded-full text-2xl hover:bg-opacity-80">
+            <Link href={'/fittingroom'} className="inline-block bg-[var(--taupe)] text-white py-2 px-6 rounded-full text-2xl hover:bg-opacity-80">
                 Try demo
             </Link>
         </div>

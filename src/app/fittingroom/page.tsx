@@ -19,19 +19,10 @@ interface Catalog {
   "Men's": CategoryGarments;
   "Women's": CategoryGarments;
 }
-interface FormData {
-  email: string;
-  message: string;
-} 
 
 
 
 export default function Demo() {
-  // access code states
-  const [hasAccess, setHasAccess] = useState<boolean>(false);
-  const [code, setCode] = useState<string[]>(Array(6).fill(""));
-  const [error, setError] = useState<string>("");
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   // fitting room states
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [gender, setGender] = useState<"Men's" | "Women's">("Men's");
@@ -42,32 +33,6 @@ export default function Demo() {
   const [taskStatus, setTaskStatus] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [tryOnResult, setTryOnResult] = useState<string | null>(null);
-  // Access codes expiration
-  const [currentTime, setCurrentTime] = useState<Date>(new Date());
-  const expirationTime : Date = new Date('2025-05-27T20:30:00');
-  // Form data states
-  const [formData, setFormData] = useState<FormData>({
-    email: "",
-    message: ""
-  });
-
-  // Update current time every second
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-  const getTimeRemaining = () => {
-    const diffMs = expirationTime.getTime() - currentTime.getTime();
-    if (diffMs <= 0) return "Expired";
-    const diffSeconds = Math.floor(diffMs / 1000);
-    const days = Math.floor(diffSeconds / (3600 * 24));
-    const hours = Math.floor((diffSeconds % (3600 * 24)) / 3600);
-    const minutes = Math.floor((diffSeconds % 3600) / 60);
-    const seconds = diffSeconds % 60;
-    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-  };
 
   // Catalog data
   const catalog : Catalog = {
@@ -76,7 +41,6 @@ export default function Demo() {
         { id: 1, src: "/mens_top1.png", alt: "Men's Top 1", vendor: "Abercrombie & Fitch", price: "$45" },
         { id: 2, src: "/mens_top2.png", alt: "Men's Top 2", vendor: "Abercrombie & Fitch", price: "$50" },
         { id: 3, src: "/mens_top3.png", alt: "Men's Top 3", vendor: "Abercrombie & Fitch", price: "$55" },
-        { id: 4, src: "/mens_top4.png", alt: "Men's Top 4", vendor: "Abercrombie & Fitch", price: "$55" },
       ],
       Bottoms: [],
       Dresses: [],
@@ -90,59 +54,6 @@ export default function Demo() {
       Bottoms: [],
       Dresses: [],
     },
-  };
-
-  useEffect(() => {
-    const storedAccess = localStorage.getItem("fitly_demo_access");
-    const storedCode = localStorage.getItem("fitly_demo_code");
-    if (storedAccess === "true" && storedCode) {
-      setHasAccess(true);
-      setCode(storedCode.split(""));
-    }
-  }, []);
-
-  const handleChange = (index: number, value: string) => {
-    const pattern = /^[A-Za-z0-9]?$/;
-    if (!pattern.test(value)) return;
-    
-    const newCode = [...code];
-    newCode[index] = value.toUpperCase();
-    setCode(newCode);
-
-    if (value && index < inputRefs.current.length - 1) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace") {
-      if (code[index]) {
-        const newCode = [...code];
-        newCode[index] = "";
-        setCode(newCode);
-      } else if (index > 0) {
-        inputRefs.current[index - 1]?.focus();
-      }
-    }
-  };
-
-  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    const pastedData = e.clipboardData.getData("text").slice(0, 6).toUpperCase();
-    setCode(pastedData.split(""));
-    inputRefs.current[pastedData.length - 1]?.focus();
-  };
-
-  const handleSubmit = () => {
-    const enteredCode = code.join("");
-    setError("");
-    if (enteredCode === "314315") {
-      setHasAccess(true);
-      localStorage.setItem("fitly_demo_access", "true");
-      localStorage.setItem("fitly_demo_code", code.join(""));
-    } else {
-      setError("Invalid Access Code");
-    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -293,63 +204,16 @@ export default function Demo() {
 
   return (
     <div className="w-screen h-screen flex flex-col md:flex-row justify-center">
-      {!hasAccess ? (
-        <>
-          {/* Left side */}
-          <div className="hidden md:flex md:flex-1 bg-[var(--taupe)] items-center justify-center px-10 rounded-br-[60px]">
-            <Image src="/logo_light.png" alt="FITLY" width={250} height={500} />
-          </div>
-
-          {/* Right side */}
-          <div className="w-full md:flex-1 flex flex-col justify-center items-center md:items-start px-4 md:px-20 py-8">
-            <h2 className="text-[var(--jet)] text-4xl md:text-6xl">Access Code</h2>
-            <p className="text-[var(--jet)] text-sm mb-6 font-sans text-center">
-              Don't have a code?{" "}
-              <span className="underline">Contact sreenand6@gmail.com for one</span>
-            </p>
-            <div className="flex space-x-3 mb-6 w-full max-w-md justify-center">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <input
-                  key={index}
-                  type="text"
-                  maxLength={1}
-                  value={code[index]}
-                  ref={(el: HTMLInputElement | null) => {inputRefs.current[index] = el}}
-                  onChange={(e) => handleChange(index, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(index, e)}
-                  onPaste={handlePaste}
-                  className="w-12 h-12 md:w-16 md:h-20 border-2 border-[#3C2F26] text-center text-xl md:text-3xl rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--taupe)]"
-                />
-              ))}
-            </div>
-
-            {/* Submit Button */}
-            <button
-              className="bg-[var(--taupe)] w-full max-w-xs md:w-2/3 text-white px-6 py-2 md:py-1 rounded-full text-lg md:text-xl hover:bg-[#4A362A] transition"
-              onClick={handleSubmit}>
-              Continue
-            </button>
-
-            {/* Error Message */}
-            {error && (
-              <p className="text-red-600 text-sm font-sans mt-4">{error}</p>
-            )}
-          </div>
-        </>
-      ) : (
-        // Fitting Room
+         {/* Fitting Room */}
         <div className="w-full h-full flex flex-col mt-30 sm:mt-20 gap-10 px-10 md:px-20">
           {/* Header */}
-          <div className="flex flex-row items-end border-b-2 border-[var(--taupe)]] justify-between pt-10 pb-1">
+          <div className="flex flex-row items-end border-b-2 border-[var(--taupe)]] justify-between pt-15 md:pt-10 pb-1">
             <div className="flex flex-col">
               <p className="font-sans">Welcome to the</p>
               <h1 className="text-3xl sm:text-4xl md:text-5xl">Fitting Room</h1>
             </div>
             <div className="flex flex-col items-end">
-              <h1 className="text-xs sm:text-md lg:text-lg font-sans">Session code: {code.join("")}</h1>
-              <h1 className={`text-xs sm:text-md lg:text-lg font-bold font-sans ${currentTime > expirationTime ? 'text-red-800' : 'text-[var(--jet)]'}`}>
-                {currentTime > expirationTime ? "Expired" : `Expires in ${getTimeRemaining()}`}
-              </h1>
+              <h1 className="text-xs sm:text-md lg:text-lg font-sans"></h1>
             </div>
           </div>
 
@@ -383,12 +247,11 @@ export default function Demo() {
                   </>
                 )}
               </div>
-              <label className={`absolute bottom-6 left-1/2 -translate-x-1/2 w-4/5 ${currentTime > expirationTime ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
+              <label className={`absolute bottom-6 left-1/2 -translate-x-1/2 w-4/5`}>
                 <input
                   type="file"
                   accept="image/jpeg,image/png"
                   onChange={handleImageUpload}
-                  disabled={currentTime > expirationTime}
                   className="hidden"
                 />
                 <div className="bg-[var(--jet)] text-white font-sans px-6 py-2 rounded-full w-full flex items-center justify-center gap-2 mouse-pointer whitespace-nowrap text-sm min-w-0">
@@ -457,7 +320,6 @@ export default function Demo() {
             </div>
           </div>
         </div>
-      )}
     </div>
   );
 }
