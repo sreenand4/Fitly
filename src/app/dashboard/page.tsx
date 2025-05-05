@@ -1,36 +1,117 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getCurrentUser, fetchUserAttributes } from "aws-amplify/auth";
+import { generateClient } from 'aws-amplify/data';
+import { getUrl, remove } from 'aws-amplify/storage';
+import type { Schema } from '../../../amplify/data/resource';
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 import { Shirt, Pencil, User, ArrowRight, Upload, X } from "lucide-react";
+import ImageUploader from "@/components/ImageUploader";
+
+const client = generateClient<Schema>();
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [firstName, setFirstName] = useState<string>("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [savedImages, setSavedImages] = useState<{ url: string; id: string }[]>([]);
+  const [userId, setUserId] = useState<string>("");
+  const [userName, setUserName] = useState<string>("");
   const [showExamples, setShowExamples] = useState(false);
-  const [savedImages, setSavedImages] = useState<string[]>([]);
+  const [showUploader, setShowUploader] = useState(false);
 
+  // Separate useEffect for authentication
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        await getCurrentUser();
-        const attributes = await fetchUserAttributes();
-        setFirstName(attributes.given_name || "");
+        const user = await getCurrentUser();
+        const userAttributes = await fetchUserAttributes();
+        setUserId(user.userId);
+        setUserName(userAttributes.given_name || "");
+        setIsAuthenticated(true);
       } catch {
-        router.replace("/auth");
+        setIsAuthenticated(false);
+        router.push('/');
       }
     };
     checkAuth();
   }, [router]);
 
+  // Separate useEffect for fetching photos when userId changes
+  useEffect(() => {
+    if (userId) {
+      fetchSavedPhotos();
+    }
+  }, [userId]);
+
+  const fetchSavedPhotos = async () => {
+    try {
+      const { data: photos, errors } = await client.models.UserPhoto.list({
+        filter: {
+          userId: { eq: userId },
+          type: { eq: 'SAVED' }
+        }
+      });
+      
+      if (errors) {
+        console.error('Errors fetching photos:', errors);
+        return;
+      }
+      
+      const photoData = photos.map(photo => ({
+        url: photo.photoUrl,
+        id: photo.id
+      }));
+      setSavedImages(photoData);
+    } catch (error) {
+      console.error('Error fetching saved photos:', error);
+    }
+  };
+
+  const handleUploadSuccess = async (url: string) => {
+    try {
+      console.log('Creating UserPhoto record for URL:', url);
+      const result = await client.models.UserPhoto.create({
+        userId: userId,
+        type: 'SAVED',
+        photoUrl: url
+      });
+      console.log('UserPhoto created successfully:', result);
+      // Refresh the photos list
+      await fetchSavedPhotos();
+      setShowUploader(false);
+    } catch (error) {
+      console.error('Error creating UserPhoto:', error);
+    }
+  };
+
+  const handleDelete = async (photo: { url: string; id: string }) => {
+    try {
+      // Extract the path from the URL
+      const path = photo.url.split('/').pop();
+      if (!path) return;
+
+      // Delete from S3
+      await remove({ path: `saved-photos/${path}` });
+      console.log('Photo deleted from S3');
+      
+      // Delete from DynamoDB using the stored ID
+      const result = await client.models.UserPhoto.delete({ id: photo.id });
+      console.log('Photo deleted from DynamoDB', result);
+      
+      // Refresh the photos list
+      await fetchSavedPhotos();
+    } catch (error) {
+      console.error('Error deleting photo:', error);
+    }
+  };
+
   return (
     <div className="w-full min-h-screen bg-[var(--linen)] flex flex-col pt-30 px-2 md:px-0 mb-60">
       {/* Welcome message at the top */}
       <div className="max-w-7xl mx-auto w-full flex flex-col px-4 sm:px-6 md:px-8 lg:px-10">
-        <h1 className="text-4xl md:text-5xl text-[var(--jet)] mb-1">Welcome back{firstName ? `, ${firstName}` : ""}</h1>
+        <h1 className="text-4xl md:text-5xl text-[var(--jet)] mb-1">Welcome back, {userName}</h1>
         <p className="text-md text-[var(--jet)] font-sans">Manage your try-ons, saved images, and profile here.</p>
         <hr className="w-full mt-4 border-1 border-[var(--taupe)]" />
       </div>
@@ -87,42 +168,65 @@ export default function DashboardPage() {
                 >
                   View Examples
                 </button>
-                <button className="border border-[var(--taupe)] rounded-full px-4 py-1 text-[var(--taupe)] hover:bg-[var(--taupe)] hover:text-white transition text-sm font-sans flex items-center gap-2">
+                <button 
+                  onClick={() => setShowUploader(!showUploader)}
+                  className="border border-[var(--taupe)] rounded-full px-4 py-1 text-[var(--taupe)] hover:bg-[var(--taupe)] hover:text-white transition text-sm font-sans flex items-center gap-2"
+                >
                   <Upload className="h-4 w-4"/>
                   Upload
                 </button>
               </div>
             </div>
+            {showUploader && (
+              <div className="mt-4">
+                <ImageUploader onUploadSuccess={handleUploadSuccess} />
+              </div>
+            )}
             {savedImages.length === 0 ? (
               <div className="flex flex-col gap-4 mt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
                     <p className="text-sm font-sans text-[var(--jet)] font-bold">Recommended:</p>
                     <ul className="list-disc pl-5 space-y-1 text-sm font-sans text-[var(--jet)]">
-                      <li className="flex items-center gap-2"><li>Clear single-person photo</li><span className="text-green-500 font-bold">✓</span></li>
-                      <li className="flex items-center gap-2"><li>Full body or half-body shot</li><span className="text-green-500 font-bold">✓</span></li>
-                      <li className="flex items-center gap-2"><li>Unobstructed clothing on the model</li><span className="text-green-500 font-bold">✓</span></li>
-                      <li className="flex items-center gap-2"><li>Simple pose</li><span className="text-green-500 font-bold">✓</span></li>
-                      <li className="flex items-center gap-2"><li>Model wearing simple, fitted clothing</li><span className="text-green-500 font-bold">✓</span></li>
-                      <li className="flex items-center gap-2"><li>Unobstructed model's face</li><span className="text-green-500 font-bold">✓</span></li>
+                      <div className="flex items-center gap-2"><li>Clear single-person photo</li><span className="text-green-500 font-bold">✓</span></div>
+                      <div className="flex items-center gap-2"><li>Full body or half-body shot</li><span className="text-green-500 font-bold">✓</span></div>
+                      <div className="flex items-center gap-2"><li>Unobstructed clothing on the model</li><span className="text-green-500 font-bold">✓</span></div>
+                      <div className="flex items-center gap-2"><li>Simple pose</li><span className="text-green-500 font-bold">✓</span></div>
+                      <div className="flex items-center gap-2"><li>Model wearing simple, fitted clothing</li><span className="text-green-500 font-bold">✓</span></div>
+                      <div className="flex items-center gap-2"><li>Unobstructed model's face</li><span className="text-green-500 font-bold">✓</span></div>
                     </ul>
                   </div>
                   <div className="flex flex-col gap-2">
                     <p className="text-sm font-sans text-[var(--jet)] font-bold">Not Recommended:</p>
                     <ul className="list-disc pl-5 space-y-1 text-sm font-sans text-[var(--jet)]">
-                      <li className="flex items-center gap-2"><li>Group photos</li><span className="text-red-500 font-bold">❌</span></li>
-                      <li className="flex items-center gap-2"><li>Leaning or seated poses</li><span className="text-red-500 font-bold">❌</span></li>
-                      <li className="flex items-center gap-2"><li>Obstructed clothing areas</li><span className="text-red-500 font-bold">❌</span></li>
-                      <li className="flex items-center gap-2"><li>Complex poses</li><span className="text-red-500 font-bold">❌</span></li>
-                      <li className="flex items-center gap-2"><li>No backpacks, handbags, etc.</li><span className="text-red-500 font-bold">❌</span></li>
-                      <li className="flex items-center gap-2"><li>Obstructed model's face</li><span className="text-red-500 font-bold">❌</span></li>
+                      <div className="flex items-center gap-2"><li>Group photos</li></div>
+                      <div className="flex items-center gap-2"><li>Leaning or seated poses</li></div>
+                      <div className="flex items-center gap-2"><li>Obstructed clothing areas</li></div>
+                      <div className="flex items-center gap-2"><li>Complex poses</li></div>
+                      <div className="flex items-center gap-2"><li>No backpacks, handbags, etc.</li></div>
+                      <div className="flex items-center gap-2"><li>Obstructed model's face</li></div>
                     </ul>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {/* Render saved images here */}
+              <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                {savedImages.map((photo, index) => (
+                  <div key={index} className="relative aspect-square group">
+                    <img
+                      src={photo.url}
+                      alt={`Saved photo ${index + 1}`}
+                      className="w-full h-100 object-cover rounded-lg"
+                      loading={index < 3 ? "eager" : "lazy"}
+                    />
+                    <button
+                      onClick={() => handleDelete(photo)}
+                      className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>

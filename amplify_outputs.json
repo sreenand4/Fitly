@@ -366,7 +366,8 @@
                     "allow": "private",
                     "operations": [
                       "create",
-                      "read"
+                      "read",
+                      "delete"
                     ]
                   },
                   {
@@ -921,7 +922,8 @@
           "values": [
             "FRONT",
             "BACK",
-            "SIDE"
+            "SIDE",
+            "SAVED"
           ]
         },
         "ProductType": {
@@ -943,6 +945,31 @@
       },
       "nonModels": {}
     }
+  },
+  "storage": {
+    "aws_region": "us-east-2",
+    "bucket_name": "amplify-fitly-sreenand6-s-usersavedphotosbucket939-hv5lgkegmjjk",
+    "buckets": [
+      {
+        "name": "UserSavedPhotos",
+        "bucket_name": "amplify-fitly-sreenand6-s-usersavedphotosbucket939-hv5lgkegmjjk",
+        "aws_region": "us-east-2",
+        "paths": {
+          "saved-photos/*": {
+            "authenticated": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ],
+            "guest": [
+              "get",
+              "list"
+            ]
+          }
+        }
+      }
+    ]
   },
   "version": "1.4"
 }

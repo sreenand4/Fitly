@@ -1,6 +1,13 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { getCurrentUser } from "aws-amplify/auth";
+import { generateClient } from 'aws-amplify/data';
+import type { Schema } from '../../../amplify/data/resource';
+import Link from "next/link";
+
+const client = generateClient<Schema>();
 
 // Interfaces for garment and catalog data
 interface Garment {
@@ -20,9 +27,12 @@ interface Catalog {
   "Women's": CategoryGarments;
 }
 
+export default function FittingRoomPage() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [savedImages, setSavedImages] = useState<{ url: string; id: string }[]>([]);
+  const [userId, setUserId] = useState<string>("");
 
-
-export default function Demo() {
   // fitting room states
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [gender, setGender] = useState<"Men's" | "Women's">("Men's");
@@ -54,6 +64,49 @@ export default function Demo() {
       Bottoms: [],
       Dresses: [],
     },
+  };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const user = await getCurrentUser();
+        setUserId(user.userId);
+        setIsAuthenticated(true);
+      } catch {
+        setIsAuthenticated(false);
+      }
+    };
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
+    if (userId) {
+      fetchSavedPhotos();
+    }
+  }, [userId]);
+
+  const fetchSavedPhotos = async () => {
+    try {
+      const { data: photos, errors } = await client.models.UserPhoto.list({
+        filter: {
+          userId: { eq: userId },
+          type: { eq: 'SAVED' }
+        }
+      });
+      
+      if (errors) {
+        console.error('Errors fetching photos:', errors);
+        return;
+      }
+      
+      const photoData = photos.map(photo => ({
+        url: photo.photoUrl,
+        id: photo.id
+      }));
+      setSavedImages(photoData);
+    } catch (error) {
+      console.error('Error fetching saved photos:', error);
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -203,7 +256,8 @@ export default function Demo() {
   }, [taskId, tryOnResult]);
 
   return (
-    <div className="w-screen h-screen flex flex-col md:flex-row justify-center">
+    <div className="w-full min-h-screen bg-[var(--linen)] flex flex-col px-2 md:px-0 mb-60">
+      <div className="w-screen h-screen flex flex-col md:flex-row justify-center">
          {/* Fitting Room */}
         <div className="w-full h-full flex flex-col mt-30 sm:mt-20 gap-10 px-10 md:px-20">
           {/* Header */}
@@ -220,44 +274,99 @@ export default function Demo() {
           {/* Body */}
           <div className="flex flex-1 flex-col lg:flex-row gap-6">
             {/* Upload section */}
-            <div className="flex-1 h-fit relative bg-[var(--bone)] rounded-xl pt-5 pb-10 px-5 justify-center items-center">
-              <h2 className="text-xl mb-2 font-sans text-center font-bold">Upload your picture</h2>
-              <div className="flex-1 relative pb-10 px-5">
-                {uploadedImage ? (
-                  <div className="relative">
-                    <Image
-                      src={uploadedImage}
-                      alt="Uploaded Image"
-                      width={512}
-                      height={512}
-                      className="rounded-lg"
-                    />
-                    <button onClick={() => setUploadedImage(null)} className="absolute top-2 right-2 px-3 py-1 bg-[var(--taupe)] rounded-full text-white font-sans z-15">x</button>
+            <div className="flex-1 h-fit flex-col gap-2">
+              <div className="relative bg-[var(--bone)] rounded-xl pt-5 pb-10 px-5 justify-center items-center">
+                <h2 className="text-xl mb-2 font-sans text-center font-bold">Upload your picture</h2>
+                <div className="flex-1 relative pb-10 px-5">
+                  {uploadedImage ? (
+                    <div className="relative">
+                      <Image
+                        src={uploadedImage}
+                        alt="Uploaded Image"
+                        width={512}
+                        height={512}
+                        className="rounded-lg"
+                      />
+                      <button onClick={() => setUploadedImage(null)} className="absolute top-2 right-2 px-3 py-1 bg-[var(--taupe)] rounded-full text-white font-sans z-15">x</button>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="font-sans mb-2 text-center underline">Guidelines:</p>
+                      <ul className="list-disc pl-5 space-y-2 font-sans text-sm text-center">
+                        <li>Simple pose</li>
+                        <li>Clear solo photo</li>
+                        <li>Unobstructed face</li>
+                        <li>Subject is at least 5-6 feet from the camera</li>
+                        <li>Portrait oriented with width = 512px and length = 4096px</li>
+                      </ul>
+                    </>
+                  )}
+                </div>
+                <label className={`absolute bottom-6 left-1/2 -translate-x-1/2 w-4/5`}>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <div className="bg-[var(--jet)] text-white font-sans px-6 py-2 rounded-full w-full flex items-center justify-center gap-2 mouse-pointer whitespace-nowrap text-sm min-w-0">
+                    <span className="text-md">↑</span> Upload
+                  </div>
+                </label>
+              </div>
+
+              {/* Example/Saved Images Section */}
+              <div className="relative bg-[var(--bone)] rounded-xl p-4 border border-[var(--taupe)] mt-2">
+                <h2 className="text-sm font-bold text-[var(--jet)] font-sans">
+                  {isAuthenticated ? "" : "Example Images"}
+                </h2>
+                
+                {isAuthenticated && savedImages.length === 0 ? (
+                  <div className="text-center py-2">
+                    <Link 
+                      href="/dashboard" 
+                      className="inline-block bg-[var(--taupe)] text-white px-4 py-1 rounded-full hover:bg-opacity-80 transition text-sm font-sans"
+                    >
+                      Save images for quick access
+                    </Link>
                   </div>
                 ) : (
-                  <>
-                    <p className="font-sans mb-2 text-center underline">Guidelines:</p>
-                    <ul className="list-disc pl-5 space-y-2 font-sans text-sm text-center">
-                      <li>Simple pose</li>
-                      <li>Clear solo photo</li>
-                      <li>Unobstructed face</li>
-                      <li>Subject is at least 5-6 feet from the camera</li>
-                      <li>Portrait oriented with width = 512px and length = 4096px</li>
-                    </ul>
-                  </>
+                  <div className="grid grid-cols-3 gap-2">
+                    {isAuthenticated ? (
+                      // Display user's saved images
+                      savedImages.map((photo, index) => (
+                        <div 
+                          key={photo.id} 
+                          className="relative aspect-square cursor-pointer hover:opacity-90 transition"
+                          onClick={() => setUploadedImage(photo.url)}
+                        >
+                          <img
+                            src={photo.url}
+                            alt={`Saved photo ${index + 1}`}
+                            className="w-full h-full object-cover rounded-md"
+                          />
+                        </div>
+                      ))
+                    ) : (
+                      // Display example images
+                      [1, 2, 3].map((num) => (
+                        <div 
+                          key={num} 
+                          className="relative aspect-square cursor-pointer hover:opacity-90 transition mt-2"
+                          onClick={() => setUploadedImage(`/GoodEx${num}.png`)}
+                        >
+                          <Image
+                            src={`/GoodEx${num}.png`}
+                            alt={`Example ${num}`}
+                            fill
+                            className="object-cover rounded-md"
+                          />
+                        </div>
+                      ))
+                    )}
+                  </div>
                 )}
               </div>
-              <label className={`absolute bottom-6 left-1/2 -translate-x-1/2 w-4/5`}>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-                <div className="bg-[var(--jet)] text-white font-sans px-6 py-2 rounded-full w-full flex items-center justify-center gap-2 mouse-pointer whitespace-nowrap text-sm min-w-0">
-                  <span className="text-md">↑</span> Upload
-                </div>
-              </label>
             </div>
 
             {/* Catalogue */}
@@ -320,6 +429,7 @@ export default function Demo() {
             </div>
           </div>
         </div>
+      </div>
     </div>
   );
 }

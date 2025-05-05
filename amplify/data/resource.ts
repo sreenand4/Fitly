@@ -38,11 +38,11 @@ const schema = a.schema({
   UserPhoto: a.model({
     userId: a.string().required(),
     user: a.belongsTo('User', 'userId'),
-    type: a.enum(['FRONT', 'BACK', 'SIDE']),
+    type: a.enum(['FRONT', 'BACK', 'SIDE', 'SAVED']),
     photoUrl: a.string().required(),
   })
     .authorization((allow) => [
-      allow.authenticated().to(['create', 'read']),
+      allow.authenticated().to(['create', 'read', 'delete']),
       allow.owner().to(['read', 'update', 'delete']),
     ]),
 

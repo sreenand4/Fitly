@@ -6,7 +6,11 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "cdn.klingai.com",
-      }
+      },
+      {
+        protocol: 'https',
+        hostname: '*.s3.us-east-2.amazonaws.com',
+      },
     ]
   }
 };
