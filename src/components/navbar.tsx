@@ -93,10 +93,10 @@ export default function Navbar() {
                             <Link href="/dashboard" className="hover:text-[var(--taupe)]">Dashboard</Link>
                         </li>
                         <li>
-                            <Link href="/size-estimation" className="hover:text-[var(--taupe)]">Size Estimation</Link>
+                            <Link href="/fittingroom" className="hover:text-[var(--taupe)]">Fitting Room</Link>
                         </li>
                         <li>
-                            <Link href="/fittingroom" className="hover:text-[var(--taupe)]">Fitting Room</Link>
+                            <Link href="/size-estimation" className="hover:text-[var(--taupe)]">Size Estimation</Link>
                         </li>
                         <li>
                             <Link href="/profile" className="hover:text-[var(--taupe)]">Profile</Link>
@@ -120,8 +120,8 @@ export default function Navbar() {
                 ) : (
                     <ul className="flex flex-col py-4 px-6 space-y-4 text-[var(--jet)] text-xl text-center">
                         <li> <Link href="/dashboard" className="hover:text-[var(--taupe)]">Dashboard</Link> </li>
-                        <li> <Link href="/size-estimation" className="hover:text-[var(--taupe)]">Size Estimation</Link> </li>
                         <li> <Link href="/fittingroom" className="hover:text-[var(--taupe)]">Fitting Room</Link> </li>
+                        <li> <Link href="/size-estimation" className="hover:text-[var(--taupe)]">Size Estimation</Link> </li>
                         <li> <Link href="/profile" className="hover:text-[var(--taupe)]">Settings</Link> </li>
                         <li className="cursor-pointer hover:text-[var(--taupe)]" onClick={async () => {
                             await signOut();

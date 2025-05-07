@@ -255,24 +255,6 @@ export default function FittingRoomPage() {
     return () => clearInterval(interval);
   }, [taskId, tryOnResult]);
 
-  const handleImageSelect = async (imageUrl: string) => {
-    try {
-      // Fetch the image and convert to base64
-      const response = await fetch(imageUrl);
-      const blob = await response.blob();
-      const reader = new FileReader();
-      
-      reader.onloadend = () => {
-        const base64data = reader.result as string;
-        setUploadedImage(base64data);
-      };
-      
-      reader.readAsDataURL(blob);
-    } catch (error) {
-      console.error('Error converting image to base64:', error);
-    }
-  };
-
   return (
     <div className="w-full min-h-screen bg-[var(--linen)] flex flex-col px-2 md:px-0 mb-60">
       <div className="w-screen h-screen flex flex-col md:flex-row justify-center">
@@ -356,7 +338,15 @@ export default function FittingRoomPage() {
                         <div 
                           key={photo.id} 
                           className="relative aspect-square cursor-pointer hover:opacity-90 transition"
-                          onClick={() => handleImageSelect(photo.url)}
+                          onClick={async () => {
+                            try {
+                              const base64Image = await getBase64Url(photo.url);
+                              setUploadedImage(base64Image);
+                            } catch (error) {
+                              console.error("Error converting saved image to base64:", error);
+                              alert("Failed to load saved image. Please try again.");
+                            }
+                          }}
                         >
                           <img
                             src={photo.url}
@@ -370,8 +360,8 @@ export default function FittingRoomPage() {
                       [1, 2, 3].map((num) => (
                         <div 
                           key={num} 
-                          className="relative aspect-square cursor-pointer hover:opacity-90 transition"
-                          onClick={() => handleImageSelect(`/GoodEx${num}.png`)}
+                          className="relative aspect-square cursor-pointer hover:opacity-90 transition mt-2"
+                          onClick={() => setUploadedImage(`/GoodEx${num}.png`)}
                         >
                           <Image
                             src={`/GoodEx${num}.png`}
