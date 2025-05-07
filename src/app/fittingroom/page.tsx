@@ -139,7 +139,18 @@ export default function FittingRoomPage() {
   };
 
   const getBase64Url = async (url: string): Promise<string> => {
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      method: 'GET',
+      mode: 'cors',
+      headers: {
+        'Accept': 'image/*'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+    }
+    
     const blob = await response.blob();
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
