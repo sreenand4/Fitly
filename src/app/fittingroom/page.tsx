@@ -152,6 +152,25 @@ export default function FittingRoomPage() {
     }
   };
 
+  const getLocalBase64Url = async (url: string): Promise<string> => {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+      }
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error('Error converting local image to base64:', error);
+      throw error;
+    }
+  };
+
   const handleTryOn = async () => {
     // validate inputs
     if (!uploadedImage || !selectedGarment) return;
@@ -165,7 +184,7 @@ export default function FittingRoomPage() {
       // convert images to pure base64
       const base64HumanImage = uploadedImage.split(",")[1];
       const garmentUrl = `/Garments${selectedGarment.src}`;
-      const base64GarmentImageFull = await getBase64Url(garmentUrl);
+      const base64GarmentImageFull = await getLocalBase64Url(garmentUrl);
       const base64GarmentImage = base64GarmentImageFull.split(",")[1];
       // make call to /api/try-on
       const response = await fetch("../api/try-on", {
