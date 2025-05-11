@@ -5,6 +5,19 @@ import { useRouter } from "next/navigation";
 
 export default function Profile() {
   const router = useRouter();
+
+    const handleSignOut = async () => {
+        try {
+            await signOut();
+            // Clear the user type cookie
+            document.cookie = 'userType=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';          
+            router.push("/");
+        } catch (error) {
+            console.error("Error signing out:", error);
+        }
+    };
+
+
   return (
     <div className="w-screen h-screen flex flex-col md:flex-row justify-center">
          {/* Profile */}
@@ -15,10 +28,7 @@ export default function Profile() {
                     <p className="font-sans">Welcome to your</p>
                     <h1 className="text-3xl sm:text-4xl md:text-5xl">Profile</h1>
                 </div>
-                <button className="px-4 py-2 hover:bg-[var(--bone)] cursor-pointer" onClick={async () => {
-                    await signOut();
-                    router.push("/");
-                }}>
+                <button className="px-4 py-2 hover:bg-[var(--bone)] cursor-pointer" onClick={handleSignOut}>
                     Sign Out
                 </button>
             </div>

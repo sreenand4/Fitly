@@ -48,7 +48,8 @@ const schema = a.schema({
 
   Retailer: a.model({
     name: a.string().required(),
-    logoUrl: a.string().required(),
+    bio: a.string(),
+    logoUrl: a.string(),
     products: a.hasMany('Product', 'retailerId'),
     sizeGuide: a.hasOne('SizeGuide', 'retailerId'),
   })
@@ -61,15 +62,17 @@ const schema = a.schema({
     retailerId: a.string().required(),
     retailer: a.belongsTo('Retailer', 'retailerId'),
     name: a.string().required(),
-    description: a.string().required(),
+    description: a.string(),
+    gender: a.enum(['MALE', 'FEMALE', 'UNISEX']),
     type: a.enum(['TOP', 'BOTTOM', 'DRESS']),
     price: a.float().required(),
-    imageUrl: a.string().required(),
+    frontEndImageUrl: a.string().required(),
+    backEndImageUrl: a.string().required(),
     sizeGuide: a.hasOne('SizeGuide', 'productId'),
     tryOnInstances: a.hasMany('TryOnInstance', 'productId'),
   })
     .authorization((allow) => [
-      allow.authenticated().to(['create', 'read']),
+      allow.authenticated().to(['create', 'read', 'update', 'delete']),
       allow.owner().to(['read', 'update', 'delete']),
     ]),
 

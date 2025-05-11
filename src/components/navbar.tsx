@@ -2,13 +2,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { getCurrentUser, signOut } from "aws-amplify/auth";
+import { getCurrentUser, signOut, fetchUserAttributes } from "aws-amplify/auth";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 
 export default function Navbar() {
     const [isClient, setIsClient] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [userType, setUserType] = useState<string | null>(null);
     const [showDropdown, setShowDropdown] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const pathname = usePathname();
@@ -24,9 +25,13 @@ export default function Navbar() {
         const checkUser = async () => {
             try {
                 await getCurrentUser();
+                const attributes = await fetchUserAttributes();
+                const userTypeAttr = attributes['custom:userType'];
+                setUserType(userTypeAttr || null);
                 setIsAuthenticated(true);
             } catch {
                 setIsAuthenticated(false);
+                setUserType(null);
             }
         };
         checkUser();
@@ -51,6 +56,23 @@ export default function Navbar() {
                     setIsMobileMenuOpen(false)
                 }
             }
+        }
+    };
+
+    const getDashboardLink = () => {
+        return userType === 'retailer' ? '/retailer/dashboard' : '/user/dashboard';
+    };
+
+    const handleSignOut = async () => {
+        try {
+            await signOut();
+            // Clear the user type cookie
+            document.cookie = 'userType=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+            setIsAuthenticated(false);
+            setUserType(null);
+            router.push("/");
+        } catch (error) {
+            console.error("Error signing out:", error);
         }
     };
 
@@ -90,17 +112,34 @@ export default function Navbar() {
                 ) : (
                     <ul className="hidden md:flex md:w-3/4 justify-end space-x-6 text-[var(--jet)] text-xl lg:text-2xl items-center">
                         <li>
-                            <Link href="/dashboard" className="hover:text-[var(--taupe)]">Dashboard</Link>
+                            <Link href={getDashboardLink()} className="hover:text-[var(--taupe)]">Dashboard</Link>
                         </li>
+                        {/* Only show to consumers */}
+                        {userType == "consumer" && 
                         <li>
                             <Link href="/fittingroom" className="hover:text-[var(--taupe)]">Fitting Room</Link>
-                        </li>
+                        </li>}
+                        {userType == "consumer" && 
                         <li>
-                            <Link href="/size-estimation" className="hover:text-[var(--taupe)]">Size Estimation</Link>
-                        </li>
+                            <Link href="/user/size-estimation" className="hover:text-[var(--taupe)]">Size Estimation</Link>
+                        </li>}
+                        {userType == "consumer" && 
                         <li>
-                            <Link href="/profile" className="hover:text-[var(--taupe)]">Profile</Link>
-                        </li>
+                            <Link href="/user/profile" className="hover:text-[var(--taupe)]">Profile</Link>
+                        </li>}
+                        {/* Only show to retailers */}
+                        {userType == "retailer" && 
+                        <li>
+                            <Link href="/retailer/products" className="hover:text-[var(--taupe)]">Products</Link>
+                        </li>}
+                        {userType == "retailer" && 
+                        <li>
+                            <Link href="/retailer/analytics" className="hover:text-[var(--taupe)]">Analytics</Link>
+                        </li>}
+                        {userType == "retailer" && 
+                        <li>
+                            <Link href="/retailer/profile" className="hover:text-[var(--taupe)]">Profile</Link>
+                        </li>}
                     </ul>
                 )}
             </nav>
@@ -119,15 +158,23 @@ export default function Navbar() {
                     </ul>
                 ) : (
                     <ul className="flex flex-col py-4 px-6 space-y-4 text-[var(--jet)] text-xl text-center">
-                        <li> <Link href="/dashboard" className="hover:text-[var(--taupe)]">Dashboard</Link> </li>
-                        <li> <Link href="/fittingroom" className="hover:text-[var(--taupe)]">Fitting Room</Link> </li>
-                        <li> <Link href="/size-estimation" className="hover:text-[var(--taupe)]">Size Estimation</Link> </li>
-                        <li> <Link href="/profile" className="hover:text-[var(--taupe)]">Settings</Link> </li>
-                        <li className="cursor-pointer hover:text-[var(--taupe)]" onClick={async () => {
-                            await signOut();
-                            setIsAuthenticated(false);
-                            router.push("/");
-                        }}>
+                        <li> <Link href={getDashboardLink()} className="hover:text-[var(--taupe)]">Dashboard</Link> </li>
+                        {/* Only show to consumers */}
+                        {userType == "consumer" && 
+                            <li> <Link href="/fittingroom" className="hover:text-[var(--taupe)]">Fitting Room</Link> </li>}
+                        {userType == "consumer" && 
+                            <li> <Link href="/user/size-estimation" className="hover:text-[var(--taupe)]">Size Estimation</Link> </li>}
+                        {userType == "consumer" && 
+                            <li> <Link href="/user/profile" className="hover:text-[var(--taupe)]">Profile</Link> </li>}
+
+                        {/* Only show to retailers */}
+                        {userType == "retailer" && 
+                            <li> <Link href="/retailer/products" className="hover:text-[var(--taupe)]">Products</Link> </li>}
+                        {userType == "retailer" && 
+                            <li> <Link href="/retailer/analytics" className="hover:text-[var(--taupe)]">Analytics</Link> </li>}
+                        {userType == "retailer" && 
+                            <li> <Link href="/retailer/profile" className="hover:text-[var(--taupe)]">Profile</Link> </li>}
+                        <li className="cursor-pointer hover:text-[var(--taupe)]" onClick={handleSignOut}>
                             Sign Out
                         </li>
                     </ul>

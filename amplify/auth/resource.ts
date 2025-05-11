@@ -17,5 +17,13 @@ export const auth = defineAuth({
       required: true,
       mutable: true,
     },
+    'custom:userType': {
+      dataType: 'String',
+      mutable: true,
+    },
+    'custom:companyName': {
+      dataType: 'String',
+      mutable: true,
+    }
   },
 });

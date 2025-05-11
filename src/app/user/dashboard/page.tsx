@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { getCurrentUser, fetchUserAttributes } from "aws-amplify/auth";
 import { generateClient } from 'aws-amplify/data';
 import { getUrl, remove } from 'aws-amplify/storage';
-import type { Schema } from '../../../amplify/data/resource';
+import type { Schema } from '../../../../amplify/data/resource';
 import Image from "next/image";
 import Link from "next/link";
 import { Shirt, Pencil, User, ArrowRight, Upload, X } from "lucide-react";
@@ -14,7 +14,6 @@ const client = generateClient<Schema>();
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [savedImages, setSavedImages] = useState<{ url: string; id: string }[]>([]);
   const [userId, setUserId] = useState<string>("");
   const [userName, setUserName] = useState<string>("");
@@ -29,16 +28,14 @@ export default function DashboardPage() {
         const userAttributes = await fetchUserAttributes();
         setUserId(user.userId);
         setUserName(userAttributes.given_name || "");
-        setIsAuthenticated(true);
       } catch {
-        setIsAuthenticated(false);
-        router.push('/');
+        router.push('/auth');
       }
     };
     checkAuth();
   }, [router]);
 
-  // Separate useEffect for fetching photos when userId changes
+  // Fetch saved photos when userId changes
   useEffect(() => {
     if (userId) {
       fetchSavedPhotos();
@@ -137,7 +134,7 @@ export default function DashboardPage() {
               <span className="font-bold text-lg font-sans">Let's Estimate Your Size</span>
             </div>
             <p className="text-sm font-sans mb-2">Upload front, back and side pictures to get an instant size estimate</p>
-            <Link href="/size-estimation" className="bg-[var(--taupe)] text-white py-2 px-4 rounded-full text-base w-fit hover:bg-opacity-80 font-sans flex items-center gap-2">
+            <Link href="/user/size-estimation" className="bg-[var(--taupe)] text-white py-2 px-4 rounded-full text-base w-fit hover:bg-opacity-80 font-sans flex items-center gap-2">
               Estimate now 
               <ArrowRight className="h-4 w-4" />
             </Link>
@@ -149,7 +146,7 @@ export default function DashboardPage() {
               <span className="font-bold text-lg font-sans">Manage Your Profile</span>
             </div>
             <p className="text-sm font-sans mb-2">Upload front, back and side pictures to get an instant size estimate</p>
-            <Link href="/profile" className="border-1 border-[var(--taupe)] text-[var(--jet)] py-2 px-4 rounded-full text-base w-fit hover:bg-opacity-80 font-sans flex items-center gap-2">
+            <Link href="/user/profile" className="border-1 border-[var(--taupe)] text-[var(--jet)] py-2 px-4 rounded-full text-base w-fit hover:bg-opacity-80 font-sans flex items-center gap-2">
               Edit profile 
               <ArrowRight className="h-4 w-4" />
             </Link>
@@ -179,7 +176,7 @@ export default function DashboardPage() {
             </div>
             {showUploader && (
               <div className="mt-4">
-                <ImageUploader onUploadSuccess={handleUploadSuccess} />
+                <ImageUploader onUploadSuccess={handleUploadSuccess} folder="saved-photos" />
               </div>
             )}
             {savedImages.length === 0 ? (

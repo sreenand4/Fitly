@@ -346,7 +346,7 @@ export default function FittingRoomPage() {
                 {isAuthenticated && savedImages.length === 0 ? (
                   <div className="text-center py-2">
                     <Link 
-                      href="/dashboard" 
+                      href="/user/dashboard" 
                       className="inline-block bg-[var(--taupe)] text-white px-4 py-1 rounded-full hover:bg-opacity-80 transition text-sm font-sans"
                     >
                       Save images for quick access

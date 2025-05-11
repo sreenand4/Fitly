@@ -4,9 +4,10 @@ import { Upload } from 'lucide-react';
 
 interface ImageUploaderProps {
   onUploadSuccess: (url: string) => void;
+  folder?: string; // Optional folder name
 }
 
-export default function ImageUploader({ onUploadSuccess }: ImageUploaderProps) {
+export default function ImageUploader({ onUploadSuccess, folder = "saved-photos" }: ImageUploaderProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,7 +36,7 @@ export default function ImageUploader({ onUploadSuccess }: ImageUploaderProps) {
       console.log("Uploading image to S3...");
       const result = await uploadData({
         data: file,
-        path: `saved-photos/${file.name}`,
+        path: `${folder}/${file.name}`,
         options: { contentType: file.type }
       }).result;
       console.log("Upload successful:", result);

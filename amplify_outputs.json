@@ -408,11 +408,18 @@
               "isRequired": true,
               "attributes": []
             },
+            "bio": {
+              "name": "bio",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
             "logoUrl": {
               "name": "logoUrl",
               "isArray": false,
               "type": "String",
-              "isRequired": true,
+              "isRequired": false,
               "attributes": []
             },
             "products": {
@@ -546,7 +553,16 @@
               "name": "description",
               "isArray": false,
               "type": "String",
-              "isRequired": true,
+              "isRequired": false,
+              "attributes": []
+            },
+            "gender": {
+              "name": "gender",
+              "isArray": false,
+              "type": {
+                "enum": "ProductGender"
+              },
+              "isRequired": false,
               "attributes": []
             },
             "type": {
@@ -565,8 +581,15 @@
               "isRequired": true,
               "attributes": []
             },
-            "imageUrl": {
-              "name": "imageUrl",
+            "frontEndImageUrl": {
+              "name": "frontEndImageUrl",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "backEndImageUrl": {
+              "name": "backEndImageUrl",
               "isArray": false,
               "type": "String",
               "isRequired": true,
@@ -636,7 +659,9 @@
                     "allow": "private",
                     "operations": [
                       "create",
-                      "read"
+                      "read",
+                      "update",
+                      "delete"
                     ]
                   },
                   {
@@ -926,6 +951,14 @@
             "SAVED"
           ]
         },
+        "ProductGender": {
+          "name": "ProductGender",
+          "values": [
+            "MALE",
+            "FEMALE",
+            "UNISEX"
+          ]
+        },
         "ProductType": {
           "name": "ProductType",
           "values": [
@@ -948,14 +981,26 @@
   },
   "storage": {
     "aws_region": "us-east-2",
-    "bucket_name": "amplify-fitly-sreenand6-s-usersavedphotosbucket939-hv5lgkegmjjk",
+    "bucket_name": "amplify-fitly-sreenand6-s-fitlystoragebucket2f7765-kmk9juxayak5",
     "buckets": [
       {
-        "name": "UserSavedPhotos",
-        "bucket_name": "amplify-fitly-sreenand6-s-usersavedphotosbucket939-hv5lgkegmjjk",
+        "name": "FitlyStorage",
+        "bucket_name": "amplify-fitly-sreenand6-s-fitlystoragebucket2f7765-kmk9juxayak5",
         "aws_region": "us-east-2",
         "paths": {
           "saved-photos/*": {
+            "authenticated": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ],
+            "guest": [
+              "get",
+              "list"
+            ]
+          },
+          "product-images/*": {
             "authenticated": [
               "get",
               "list",
