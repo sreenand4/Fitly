@@ -43,6 +43,8 @@ export default function FittingRoomPage() {
   const [taskStatus, setTaskStatus] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [tryOnResult, setTryOnResult] = useState<string | null>(null);
+  // retailer states
+  const [retailers, setRetailers] = useState<any[]>([]);
 
   // Catalog data
   const catalog : Catalog = {
@@ -77,6 +79,23 @@ export default function FittingRoomPage() {
       }
     };
     checkAuth();
+  }, []);
+
+  useEffect(() => {
+    const fetchRetailers = async () => {
+      try {
+        const { data: retailers, errors } = await client.models.Retailer.list();
+        if (errors) {
+          console.error("Error fetching retailers:", errors);
+          return;
+        }
+        console.log("Retailers:", retailers);
+        setRetailers(retailers);
+      } catch (error) {
+        console.error("Error fetching retailers:", error);
+      }
+    };
+    fetchRetailers();
   }, []);
 
   useEffect(() => {

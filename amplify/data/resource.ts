@@ -54,8 +54,9 @@ const schema = a.schema({
     sizeGuide: a.hasOne('SizeGuide', 'retailerId'),
   })
     .authorization((allow) => [
-      allow.authenticated().to(['create', 'read']),
-      allow.owner().to(['read', 'update', 'delete']),
+      allow.guest().to(['read']),
+      allow.authenticated().to(['create']),
+      allow.owner().to(['update', 'delete']),
     ]),
 
   Product: a.model({

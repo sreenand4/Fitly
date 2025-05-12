@@ -483,10 +483,16 @@
               "properties": {
                 "rules": [
                   {
+                    "allow": "public",
+                    "provider": "iam",
+                    "operations": [
+                      "read"
+                    ]
+                  },
+                  {
                     "allow": "private",
                     "operations": [
-                      "create",
-                      "read"
+                      "create"
                     ]
                   },
                   {
@@ -494,7 +500,6 @@
                     "ownerField": "owner",
                     "allow": "owner",
                     "operations": [
-                      "read",
                       "update",
                       "delete"
                     ],
