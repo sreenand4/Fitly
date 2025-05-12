@@ -84,7 +84,7 @@ const schema = a.schema({
     productId: a.string().required(),
     product: a.belongsTo('Product', 'productId'),
     photoUrl: a.string().required(),
-    recommendedSize: a.string().required(),
+    recommendedSize: a.string(),
   })
     .authorization((allow) => [
       allow.authenticated().to(['create', 'read']),

@@ -10,24 +10,6 @@ import { AnimationPlaybackControls } from "framer-motion";
 
 const client = generateClient<Schema>();
 
-// Interfaces for garment and catalog data
-interface Garment {
-  id: number;
-  src: string;
-  alt: string;
-  vendor: string;
-  price: string;
-}
-interface CategoryGarments {
-  "Tops": Garment[];
-  "Bottoms": Garment[];
-  "Dresses": Garment[];
-}
-interface Catalog {
-  "Men's": CategoryGarments;
-  "Women's": CategoryGarments;
-}
-
 async function getAuthMode() {
   try {
     await getCurrentUser();
@@ -45,41 +27,17 @@ export default function FittingRoomPage() {
 
   // fitting room states
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [gender, setGender] = useState<"Men's" | "Women's">("Men's");
-  const [category, setCategory] = useState<"Tops" | "Bottoms" | "Dresses">("Tops");
-  const [selectedGarment, setSelectedGarment] = useState<Garment | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   // try-on states
   const [taskId, setTaskId] = useState<string | null>(null);
   const [taskStatus, setTaskStatus] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [tryOnResult, setTryOnResult] = useState<string | null>(null);
+  const [tryOnResult, setTryOnResult] = useState<string | null>("");
+  const [triedOnProduct, setTriedOnProduct] = useState<any | null>(null);
   // retailer states
   const [retailers, setRetailers] = useState<{id: string, name: string}[]>([]);
   const [selectedRetailer, setSelectedRetailer] = useState<{id: string}>();
   const [products, setProducts] = useState<any[]>([]);
-
-  // Catalog data
-  const catalog : Catalog = {
-    "Men's": {
-      Tops: [
-        { id: 1, src: "/mens_top1.png", alt: "Men's Top 1", vendor: "Abercrombie & Fitch", price: "$45" },
-        { id: 2, src: "/mens_top2.png", alt: "Men's Top 2", vendor: "Abercrombie & Fitch", price: "$50" },
-        { id: 3, src: "/mens_top3.png", alt: "Men's Top 3", vendor: "Abercrombie & Fitch", price: "$55" },
-      ],
-      Bottoms: [],
-      Dresses: [],
-    },
-    "Women's": {
-      Tops: [
-        { id: 13, src: "/womens_top1.png", alt: "Women's Top 1", vendor: "Abercrombie & Fitch", price: "$40" },
-        { id: 14, src: "/womens_top2.png", alt: "Women's Top 2", vendor: "Abercrombie & Fitch",  price: "$45" },
-        { id: 15, src: "/womens_top3.png", alt: "Women's Top 3", vendor: "Abercrombie & Fitch", price: "$40" },
-      ],
-      Bottoms: [],
-      Dresses: [],
-    },
-  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -233,7 +191,7 @@ export default function FittingRoomPage() {
     setTaskId(null);
     setTryOnResult(null);
     setTaskStatus(null);
-
+    setTriedOnProduct(selectedProduct);
     try {
       // convert images to pure base64
       console.log("Selected product for try-on:", selectedProduct);
@@ -319,8 +277,24 @@ export default function FittingRoomPage() {
           
           // Send email with the result
           await emailConfirmation(data.result); // Call email function with the result directly
-          
+
           clearInterval(interval); // Stop polling
+
+          // Save the look
+          if (isAuthenticated) {
+            const savedLook = {
+              userId: userId,
+              productId: triedOnProduct.id,
+              photoUrl: data.result,
+            }
+            const { data: savedLookResult, errors } = await client.models.TryOnInstance.create(savedLook);
+            if (errors) {
+              console.error("Error saving look:", errors);
+            } else {
+              console.log("Look saved successfully:", savedLookResult);
+            }
+          }
+          
         } else if (data.status === "failed") {
           setIsProcessing(false);
           clearInterval(interval); // Stop polling on failure
@@ -353,11 +327,6 @@ export default function FittingRoomPage() {
     }
   }
 
-  useEffect(() => {
-    if (selectedProduct) {
-      console.log("Selected product:", selectedProduct);
-    }
-  }, [selectedProduct]);
 
   return (
     <div className="w-full min-h-screen bg-[var(--linen)] flex flex-col px-2 md:px-0 mb-60">
@@ -378,7 +347,7 @@ export default function FittingRoomPage() {
           {/* Body */}
           <div className="flex flex-1 flex-col lg:flex-row gap-6">
             {/* Upload section */}
-            <div className="flex-1 h-fit flex-col gap-2">
+            <div className="flex flex-1 h-fit flex-col gap-2">
               <div className="relative bg-[var(--bone)] rounded-xl pt-5 pb-10 px-5 justify-center items-center">
                 <h2 className="text-xl mb-2 font-sans text-center font-bold">Upload your picture</h2>
                 <div className="flex-1 relative pb-10 px-5">
@@ -413,9 +382,9 @@ export default function FittingRoomPage() {
                     onChange={handleImageUpload}
                     className="hidden"
                   />
-                  <div className="bg-[var(--jet)] text-white font-sans px-6 py-2 rounded-full w-full flex items-center justify-center gap-2 mouse-pointer whitespace-nowrap text-sm min-w-0">
+                  {!uploadedImage && <div className="bg-[var(--jet)] text-white font-sans px-6 py-2 rounded-full w-full flex items-center justify-center gap-2 mouse-pointer whitespace-nowrap text-sm min-w-0">
                     <span className="text-md">↑</span> Upload
-                  </div>
+                  </div>}
                 </label>
               </div>
 
@@ -490,11 +459,11 @@ export default function FittingRoomPage() {
             </div>
 
             {/* Catalogue */}
-            <div className="flex flex-col flex-2 h-fit relative bg-[var(--bone)] rounded-xl pt-5 pb-10 px-5 items-center">
+            <div className="flex flex-col flex-2 h-fit relative bg-[var(--linen)] border-3 border-[var(--taupe)]/50 rounded-xl pt-5 pb-10 px-5 items-center md:mb-20">
                 <div className="flex flex-row items-center justify-center gap-2">
                   <h2 className="text-xl font-sans font-bold">Shop </h2>
                   <select 
-                    className="bg-transparent border-none text-center cursor-pointer text-xl"
+                    className="bg-transparent rounded-md text-center cursor-pointer text-xl font-sans flex-1"
                     onChange={(e) => {
                       setSelectedRetailer({id: e.target.value});
                     }}
@@ -520,20 +489,32 @@ export default function FittingRoomPage() {
                 </div> */}
 
                 {/* Garment selection */}
-                <div className="flex flex-wrap justify-center gap-8 w-full mt-4 px-5 pb-10">
-                  {/* {catalog[gender][category].map((garment: Garment) => (
-                    <div key={garment.id} onClick={() => {selectedGarment?.src === garment.src ? setSelectedGarment(null) : setSelectedGarment(garment)}} className="relative flex items-center cursor-pointer rounded-xl font-sans">
-                      <Image src={`/Garments${garment.src}`} alt={garment.alt} width={155} height={150} className="object-fit rounded-xl"/>
-                      {selectedGarment && selectedGarment?.src === garment.src && (
-                        <div className="absolute inset-0 border-2 border-[var(--taupe)] rounded-xl"/>
-                      )}
-                    </div>
-                  ))} */}
+                <div className="flex flex-wrap justify-center gap-2 w-full mt-4 px-5 pb-10">
                   {products.map((product) => (
-                    <div key={product.id} onClick={() => {selectedProduct?.id === product.id ? setSelectedProduct(null) : setSelectedProduct(product)}} className="relative flex items-center cursor-pointer rounded-xl font-sans">
-                      <Image src={product.frontEndImageUrl} alt={product.name} width={155} height={150} className="object-fit rounded-xl"/>
+                    <div
+                      key={product.id}
+                      className="relative bg-[var(--bone)] rounded-xl shadow-md p-2 flex flex-col items-center transition hover:shadow-lg"
+                      style={{ width: 180, minWidth: 180, height: 320 }}
+                      onClick={() => {selectedProduct?.id === product.id ? setSelectedProduct(null) : setSelectedProduct(product)}}
+                    >
+                      <div className="relative w-full h-[220px] mb-2 overflow-hidden rounded-lg">
+                        <Image
+                          src={product.frontEndImageUrl}
+                          alt={product.name}
+                          width={180}
+                          height={220}
+                          className="w-full h-full object-cover absolute inset-0 rounded-lg"
+                        />
+                      </div>
+                      <div className="w-full flex flex-col items-start">
+                        <span className="font-bold text-base text-[var(--jet)] font-sans">{product.name}</span>
+                        <span className="text-xs text-[var(--jet)] font-sans mb-1 line-clamp-2">{product.description}</span>
+                        <span className="text-sm text-[var(--taupe)] font-semibold font-sans">${product.price}</span>
+                        <span className="text-xs text-[var(--jet)] font-sans mb-1 line-clamp-2">{product.gender === "MALE" ? "Men's" : product.gender === "FEMALE" ? "Women's" : "Unisex"}</span>
+                        {/* <span className="text-xs text-[var(--jet)] font-sans mb-1 line-clamp-2">{product.type === "TOP" ? "Top" : product.type === "BOTTOM" ? "Bottom" : "Dress"}</span> */}
+                      </div>
                       {selectedProduct && selectedProduct?.id === product.id && (
-                        <div className="absolute inset-0 border-2 border-[var(--taupe)] rounded-xl"/>
+                        <div className="absolute inset-0 border-2 border-[var(--taupe)] rounded-xl pointer-events-none"/>
                       )}
                     </div>
                   ))}
@@ -549,20 +530,40 @@ export default function FittingRoomPage() {
             </div>
 
             {/* Try-on section */}
-            <div className="flex flex-col h-4/5 mb-4 flex-1 p-5 bg-[var(--bone)] rounded-xl items-center">
-              <h2 className="text-xl mb-2 font-sans font-bold text-center">Try on</h2>
+            <div className="flex flex-col flex-1 mb-4 p-5 bg-[var(--bone)] rounded-xl items-center max-h-[800px] overflow-auto">
+              <h2 className="text-xl mb-2 font-sans font-bold">Try on</h2>
               {isProcessing || taskStatus === "submitted" || taskStatus === "processing" ? (
                 <>
-                  
                   <div className="relative flex h-12 w-12 mt-20 mb-20">
                     <div className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--taupe)]"></div>
                     <div className="animate-ping absolute inline-flex h-12 w-12 rounded-full bg-black-600"></div>
                   </div>
-                  <p className="text-center font-sans">Processing...</p>
+                  <p className="text-center font-sans">Trying on...</p>
+                  <p className="text-center font-sans">Estimated time: 20-40 sec</p>
                 </>
                 
               ) : tryOnResult ? (
-                <Image src={tryOnResult} alt="Try-On Result" width={512} height={512} className="rounded-xl mx-auto" />
+                <div className="w-full flex flex-col items-center">
+                  <Image 
+                    src={tryOnResult} 
+                    alt="Try-On Result" 
+                    width={512} 
+                    height={512} 
+                    className="rounded-t-xl max-w-full max-h-full object-contain"
+                  />
+                  {triedOnProduct && (
+                    <div className="bg-[var(--taupe)]/90 rounded-b-xl shadow-md p-4 flex flex-row justify-between w-full">
+                      <div className="flex flex-col items-start">
+                        <span className="text-base text-white font-sans">{triedOnProduct.name}</span>
+                        <span className="text-xs text-white font-sans mb-1 line-clamp-3">{triedOnProduct.description}</span>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="text-sm text-[var(--linen)] font-sans">${triedOnProduct.price}</span>
+                        <span className="text-xs text-[var(--linen)] font-sans mb-1 line-clamp-3">{triedOnProduct.gender === "MALE" ? "Men's" : triedOnProduct.gender === "FEMALE" ? "Women's" : "Unisex"}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
               ) : taskStatus === "failed" ? (
                 <p className="text-center font-sans font-red-800">Try-on failed, please try again</p>
               ) : (

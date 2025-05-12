@@ -19,6 +19,7 @@ export default function DashboardPage() {
   const [userName, setUserName] = useState<string>("");
   const [showExamples, setShowExamples] = useState(false);
   const [showUploader, setShowUploader] = useState(false);
+  const [tryOnInstances, setTryOnInstances] = useState<{ id: string; productId: string; photoUrl: string; product?: any }[]>([]);  
 
   // Separate useEffect for authentication
   useEffect(() => {
@@ -39,6 +40,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (userId) {
       fetchSavedPhotos();
+      fetchTryOnInstances();
     }
   }, [userId]);
 
@@ -65,6 +67,36 @@ export default function DashboardPage() {
       console.error('Error fetching saved photos:', error);
     }
   };
+
+  const fetchTryOnInstances = async () => {
+    try {
+      const { data: tryOnInstances, errors } = await client.models.TryOnInstance.list({
+        filter: { userId: { eq: userId } }
+      });
+
+      if (errors) {
+        console.error('Errors fetching try-on instances:', errors);
+        return;
+      }
+
+      // Fetch product details for each instance
+      const instancesWithProduct = await Promise.all(
+        tryOnInstances.map(async (instance) => {
+          const { data: product } = await client.models.Product.get({ id: instance.productId });
+          return { ...instance, product, photoUrl: instance.photoUrl };
+        })
+      );
+      setTryOnInstances(instancesWithProduct);
+    } catch (error) {
+      console.error('Error fetching try-on instances:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (tryOnInstances.length > 0) {
+      console.log('Try-on instances:', tryOnInstances);
+    }
+  }, [tryOnInstances]);
 
   const handleUploadSuccess = async (url: string) => {
     try {
@@ -154,6 +186,39 @@ export default function DashboardPage() {
         </div>
         {/* Right column */}
         <div className="flex flex-col gap-6 w-full md:w-2/3">
+          {/* Recent Try-ons */}
+          <div className="flex-1 rounded-2xl bg-[var(--bone)] p-6 flex flex-col gap-2 shadow-md min-h-[160px]">
+            <span className="font-bold text-lg font-sans">Recent Try-ons</span>
+            <div className="flex flex-row gap-6 overflow-x-auto py-2 scrollbar-thin scrollbar-thumb-[var(--taupe)] scrollbar-track-[var(--bone)]">
+              {tryOnInstances.length === 0 ? (
+                <div className="flex flex-col items-center justify-center min-h-[160px] text-[var(--taupe)] font-sans text-sm">No try-ons yet</div>
+              ) : (
+                tryOnInstances.map((instance) => (
+                  <div className="flex flex-col min-w-[220px] max-w-[220px] bg-[var(--jet)] rounded-xl shadow-md overflow-hidden">
+                    <div className="w-full aspect-[3/4] bg-[var(--linen)]">
+                      <img
+                        src={instance.photoUrl}
+                        alt="Try-On Result"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    {instance.product && (
+                      <div className="bg-[var(--taupe)]/90 px-4 py-3 flex flex-row justify-between w-full">
+                        <div className="flex flex-col items-start">
+                          <span className="text-base text-white font-sans">{instance.product.name}</span>
+                          <span className="text-xs text-white font-sans mb-1 line-clamp-3">{instance.product.description}</span>
+                        </div>
+                        <div className="flex flex-col items-end">
+                          <span className="text-sm text-[var(--linen)] font-sans">${instance.product.price}</span>
+                          <span className="text-xs text-[var(--linen)] font-sans mb-1 line-clamp-3">{instance.product.gender === "MALE" ? "Men's" : instance.product.gender === "FEMALE" ? "Women's" : "Unisex"}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
           {/* Saved Images */}
           <div className="rounded-2xl bg-[var(--bone)] p-6 flex flex-col gap-2 shadow-md min-h-[160px]">
             <div className="flex justify-between items-center">
@@ -226,11 +291,6 @@ export default function DashboardPage() {
                 ))}
               </div>
             )}
-          </div>
-          {/* Recent Try-ons */}
-          <div className="flex-1 rounded-2xl bg-[var(--bone)] p-6 flex flex-col gap-2 shadow-md min-h-[160px]">
-            <span className="font-bold text-lg font-sans">Recent Try-ons</span>
-            {/* Placeholder for try-ons */}
           </div>
         </div>
       </div>
