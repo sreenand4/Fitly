@@ -5,38 +5,38 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "next start"
   },
   "dependencies": {
-    "aws-amplify": "^6.13.4",
+    "@radix-ui/react-popover": "^1.1.11",
+    "aws-amplify": "^6.14.3",
     "axios": "^1.8.4",
+    "clsx": "^2.1.1",
     "framer-motion": "^12.4.9",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.477.0",
     "next": "15.2.0",
     "nodemailer": "^6.10.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-content-loader": "^7.0.2",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.2.0"
   },
   "devDependencies": {
-    "@aws-amplify/backend": "^1.14.2",
-    "@aws-amplify/backend-cli": "^1.4.12",
-    "@eslint/eslintrc": "^3",
+    "@aws-amplify/backend": "^1.16.0",
+    "@aws-amplify/backend-cli": "^1.7.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.20",
     "aws-cdk": "^2.1000.2",
-    "aws-cdk-lib": "^2.180.0",
+    "aws-cdk-lib": "^2.189.1",
     "constructs": "^10.4.2",
-    "esbuild": "^0.25.0",
-    "eslint": "^9",
-    "eslint-config-next": "15.2.0",
+    "esbuild": "^0.25.3",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.0.9",
     "tsx": "^4.19.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.3"
   }
 }

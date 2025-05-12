@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "../globals.css";
 import { Poppins } from "next/font/google";
 import Navbar from "@/components/navbar";
+import { ConfigureAmplifyClientSide } from '../components/ConfigureAmplify';
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -25,6 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={poppins.variable}>
       <body>
+        <ConfigureAmplifyClientSide />
         <Navbar />
         {children}
       </body>

@@ -92,7 +92,7 @@ export default function ContactForm() {
 
     return (
         <div id="contact" className="w-full min-h-fit bg-[var(--linen)] flex flex-col p-20">
-            <h1 className="text-5xl text-[var(--taupe)] mb-1">Let's talk</h1>
+            <h1 className="text-5xl text-[var(--taupe)]">Let's talk</h1>
             <p className="font-sans mb-2 text-lg">We'd love to hear from you</p>
             
             <form className="flex flex-col" onSubmit={handleSubmit}>
@@ -101,14 +101,14 @@ export default function ContactForm() {
                         type="email" 
                         name="email"
                         placeholder="Email" 
-                        className={`w-full md:w-1/2 h-12 px-4 rounded-lg border-2 ${errors.email ? 'border-red-500' : 'border-[var(--taupe)]'} text-3xl`}
+                        className={`w-full md:w-1/2 h-12 px-4 rounded-lg border-2 ${errors.email ? 'border-red-500' : 'border-[var(--taupe)]'} text-xl font-sans`}
                         value={formData.email}
                         onChange={handleChange}
                     />
-                    {errors.email && <p className="text-red-500 mt-1">{errors.email}</p>}
+                    {errors.email && <p className="text-red-500 mt-1 font-sans">{errors.email}</p>}
                 </div>
                 
-                <div className="">
+                <div className="mb-4">
                     <textarea 
                         name="message"
                         placeholder="Message" 
@@ -133,9 +133,9 @@ export default function ContactForm() {
                     disabled={isSubmitting}
                 >
                     {isSubmitting ? (
-                        <p className="text-xl">Sending...</p>
+                        <p className="text-2xl">Sending...</p>
                     ) : (
-                        <p className="text-xl">Send</p>
+                        <p className="text-2xl">Send</p>
                     )}
                 </button>
             </form>
