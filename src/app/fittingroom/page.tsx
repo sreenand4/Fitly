@@ -6,6 +6,7 @@ import { getCurrentUser } from "aws-amplify/auth";
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '../../../amplify/data/resource';
 import Link from "next/link";
+import { AnimationPlaybackControls } from "framer-motion";
 
 const client = generateClient<Schema>();
 
@@ -27,6 +28,15 @@ interface Catalog {
   "Women's": CategoryGarments;
 }
 
+async function getAuthMode() {
+  try {
+    await getCurrentUser();
+    return 'userPool';
+  } catch {
+    return 'iam';
+  }
+}
+
 export default function FittingRoomPage() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -38,13 +48,16 @@ export default function FittingRoomPage() {
   const [gender, setGender] = useState<"Men's" | "Women's">("Men's");
   const [category, setCategory] = useState<"Tops" | "Bottoms" | "Dresses">("Tops");
   const [selectedGarment, setSelectedGarment] = useState<Garment | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   // try-on states
   const [taskId, setTaskId] = useState<string | null>(null);
   const [taskStatus, setTaskStatus] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [tryOnResult, setTryOnResult] = useState<string | null>(null);
   // retailer states
-  const [retailers, setRetailers] = useState<any[]>([]);
+  const [retailers, setRetailers] = useState<{id: string, name: string}[]>([]);
+  const [selectedRetailer, setSelectedRetailer] = useState<{id: string}>();
+  const [products, setProducts] = useState<any[]>([]);
 
   // Catalog data
   const catalog : Catalog = {
@@ -74,35 +87,56 @@ export default function FittingRoomPage() {
         const user = await getCurrentUser();
         setUserId(user.userId);
         setIsAuthenticated(true);
+        fetchRetailers('userPool');
       } catch {
         setIsAuthenticated(false);
+        await fetchRetailers('iam');
       }
     };
     checkAuth();
   }, []);
 
-  useEffect(() => {
-    const fetchRetailers = async () => {
-      try {
-        const { data: retailers, errors } = await client.models.Retailer.list();
-        if (errors) {
-          console.error("Error fetching retailers:", errors);
-          return;
-        }
-        console.log("Retailers:", retailers);
-        setRetailers(retailers);
-      } catch (error) {
-        console.error("Error fetching retailers:", error);
+  const fetchRetailers = async (authMode: string) => {
+    console.log("isAuthenticated: ", isAuthenticated);
+    console.log("Fetching retailers with auth mode:", authMode);
+    try {
+      const { data: retailersRaw, errors } = await client.models.Retailer.list({
+        ...(authMode === 'userPool' ? {} : { authMode: 'iam' })
+      });
+
+      if (errors) {
+        console.error("Error fetching retailers:", errors);
+        return;
       }
-    };
-    fetchRetailers();
-  }, []);
+      console.log("Raw Retailers:", retailersRaw);
+      setRetailers(retailersRaw.map((retailer) => ({
+        id: retailer?.id,
+        name: retailer?.name
+      })));
+    } catch (error) {
+      console.error("Error fetching retailers:", error);
+    }
+  };
 
   useEffect(() => {
     if (userId) {
       fetchSavedPhotos();
     }
   }, [userId]);
+
+  // init slected retailer to 1st loaded by default
+  useEffect(() => {
+    if (retailers.length > 0) {
+      setSelectedRetailer({id: retailers[0].id});
+    }
+  }, [retailers]);
+
+  // load products when retailer changes
+  useEffect(() => {
+    if (selectedRetailer) {
+      loadProducts(selectedRetailer.id);
+    }
+  }, [selectedRetailer]);
 
   const fetchSavedPhotos = async () => {
     try {
@@ -164,6 +198,7 @@ export default function FittingRoomPage() {
         throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
       }
       const data = await response.json();
+      console.log("Base64 URL return from /api/proxy-image:", data.base64);
       return data.base64;
     } catch (error) {
       console.error('Error converting image to base64:', error);
@@ -192,7 +227,7 @@ export default function FittingRoomPage() {
 
   const handleTryOn = async () => {
     // validate inputs
-    if (!uploadedImage || !selectedGarment) return;
+    if (!uploadedImage || !selectedProduct) return;
     // reset states
     setIsProcessing(true);
     setTaskId(null);
@@ -201,9 +236,13 @@ export default function FittingRoomPage() {
 
     try {
       // convert images to pure base64
+      console.log("Selected product for try-on:", selectedProduct);
       const base64HumanImage = uploadedImage.split(",")[1];
-      const garmentUrl = `/Garments${selectedGarment.src}`;
-      const base64GarmentImageFull = await getLocalBase64Url(garmentUrl);
+      console.log("Base64 human image:", base64HumanImage);
+      const garmentUrl = selectedProduct.frontEndImageUrl;
+      console.log("Garment URL:", garmentUrl);
+      const base64GarmentImageFull = await getBase64Url(garmentUrl);
+      console.log("Base64 garment image:", base64GarmentImageFull);
       const base64GarmentImage = base64GarmentImageFull.split(",")[1];
       // make call to /api/try-on
       const response = await fetch("../api/try-on", {
@@ -295,6 +334,30 @@ export default function FittingRoomPage() {
   
     return () => clearInterval(interval);
   }, [taskId, tryOnResult]);
+
+  const loadProducts = async (retailerId: string) => {
+    const authMode = await getAuthMode();
+    console.log("Retailer ID to fetch products:", retailerId, "with authMode:", authMode);
+    const { data: products, errors } = await client.models.Product.list({
+      filter: {
+        retailerId: { eq: retailerId }
+      },
+      authMode
+    });
+  
+    if (errors) {
+      console.error("Error fetching products:", errors);
+    } else {
+      console.log("Products:", products);
+      setProducts(products);
+    }
+  }
+
+  useEffect(() => {
+    if (selectedProduct) {
+      console.log("Selected product:", selectedProduct);
+    }
+  }, [selectedProduct]);
 
   return (
     <div className="w-full min-h-screen bg-[var(--linen)] flex flex-col px-2 md:px-0 mb-60">
@@ -402,7 +465,15 @@ export default function FittingRoomPage() {
                         <div 
                           key={num} 
                           className="relative aspect-square cursor-pointer hover:opacity-90 transition mt-2"
-                          onClick={() => setUploadedImage(`/GoodEx${num}.png`)}
+                          onClick={async () => {
+                            try {
+                              const base64Image = await getLocalBase64Url(`/GoodEx${num}.png`);
+                              setUploadedImage(base64Image);
+                            } catch (error) {
+                              console.error("Error converting example image to base64:", error);
+                              alert("Failed to load example image. Please try again.");
+                            }
+                          }}
                         >
                           <Image
                             src={`/GoodEx${num}.png`}
@@ -420,9 +491,23 @@ export default function FittingRoomPage() {
 
             {/* Catalogue */}
             <div className="flex flex-col flex-2 h-fit relative bg-[var(--bone)] rounded-xl pt-5 pb-10 px-5 items-center">
-                <h2 className="text-xl font-sans text-center font-bold">Browse our catalouge</h2>
+                <div className="flex flex-row items-center justify-center gap-2">
+                  <h2 className="text-xl font-sans font-bold">Shop </h2>
+                  <select 
+                    className="bg-transparent border-none text-center cursor-pointer text-xl"
+                    onChange={(e) => {
+                      setSelectedRetailer({id: e.target.value});
+                    }}
+                  >
+                    {retailers.map((retailer) => (
+                      <option key={retailer.id} value={retailer.id}>
+                        {retailer.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 {/* selection container */}
-                <div className="flex flex-row items-center justify-center gap-10 w-full py-2 font-sans">
+                {/* <div className="flex flex-row items-center justify-center gap-10 w-full py-2 font-sans">
                   <select value={gender} onChange={(e) => setGender(e.target.value as "Men's" | "Women's")} className="">
                     <option value={"Men's"}>Men's</option>
                     <option value={"Women's"}>Women's</option>
@@ -432,14 +517,22 @@ export default function FittingRoomPage() {
                     <option value={"Bottoms"}>Bottoms</option>
                     <option value={"Dresses"}>Dresses</option>
                   </select>
-                </div>
+                </div> */}
 
                 {/* Garment selection */}
                 <div className="flex flex-wrap justify-center gap-8 w-full mt-4 px-5 pb-10">
-                  {catalog[gender][category].map((garment: Garment) => (
+                  {/* {catalog[gender][category].map((garment: Garment) => (
                     <div key={garment.id} onClick={() => {selectedGarment?.src === garment.src ? setSelectedGarment(null) : setSelectedGarment(garment)}} className="relative flex items-center cursor-pointer rounded-xl font-sans">
                       <Image src={`/Garments${garment.src}`} alt={garment.alt} width={155} height={150} className="object-fit rounded-xl"/>
                       {selectedGarment && selectedGarment?.src === garment.src && (
+                        <div className="absolute inset-0 border-2 border-[var(--taupe)] rounded-xl"/>
+                      )}
+                    </div>
+                  ))} */}
+                  {products.map((product) => (
+                    <div key={product.id} onClick={() => {selectedProduct?.id === product.id ? setSelectedProduct(null) : setSelectedProduct(product)}} className="relative flex items-center cursor-pointer rounded-xl font-sans">
+                      <Image src={product.frontEndImageUrl} alt={product.name} width={155} height={150} className="object-fit rounded-xl"/>
+                      {selectedProduct && selectedProduct?.id === product.id && (
                         <div className="absolute inset-0 border-2 border-[var(--taupe)] rounded-xl"/>
                       )}
                     </div>
@@ -448,8 +541,8 @@ export default function FittingRoomPage() {
 
                 {/* try on button */}
                 <button
-                  className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-[var(--taupe)] w-4/5 text-white px-6 py-1 rounded-full text-lg md:text-xl transition ${!(selectedGarment && uploadedImage) ? "opacity-50 cursor-not-allowed" : ""}`}
-                  disabled={!selectedGarment || !uploadedImage || isProcessing}
+                  className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-[var(--taupe)] w-4/5 text-white px-6 py-1 rounded-full text-lg md:text-xl transition ${!(selectedProduct && uploadedImage) ? "opacity-50 cursor-not-allowed" : ""}`}
+                  disabled={!selectedProduct || !uploadedImage || isProcessing}
                   onClick={handleTryOn}>
                   {isProcessing ? 'Processing...' : 'Try on'}
                 </button>

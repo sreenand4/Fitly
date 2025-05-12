@@ -55,8 +55,8 @@ const schema = a.schema({
   })
     .authorization((allow) => [
       allow.guest().to(['read']),
-      allow.authenticated().to(['create']),
-      allow.owner().to(['update', 'delete']),
+      allow.authenticated().to(['read', 'create', 'update', 'delete']),
+      allow.owner().to(['update', 'delete', 'read']),
     ]),
 
   Product: a.model({
@@ -73,6 +73,7 @@ const schema = a.schema({
     tryOnInstances: a.hasMany('TryOnInstance', 'productId'),
   })
     .authorization((allow) => [
+      allow.guest().to(['read']),
       allow.authenticated().to(['create', 'read', 'update', 'delete']),
       allow.owner().to(['read', 'update', 'delete']),
     ]),
