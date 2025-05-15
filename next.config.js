@@ -8,7 +8,7 @@ const nextConfig = {
             },
             {
                 protocol: 'https',
-                hostname: 'cdn.klingai.com',
+                hostname: 'media.bitstudio.ai',
             }
         ],
     },

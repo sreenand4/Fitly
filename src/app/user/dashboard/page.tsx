@@ -154,7 +154,7 @@ export default function DashboardPage() {
               <span className="font-bold text-lg font-sans">Explore Our Latest Collections</span>
             </div>
             <p className="text-sm font-sans mb-2">Try on new styles virtually and find your perfect fit with our AI-powered fitting room</p>
-            <Link href="/fittingroom" className="bg-[var(--taupe)] text-white py-2 px-4 rounded-full text-base w-fit hover:bg-opacity-80 font-sans flex items-center gap-2">
+            <Link href="/user/fittingroom" className="bg-[var(--taupe)] text-white py-2 px-4 rounded-full text-base w-fit hover:bg-opacity-80 font-sans flex items-center gap-2">
               Go to fitting room 
               <ArrowRight className="h-4 w-4" />
             </Link>
@@ -194,7 +194,7 @@ export default function DashboardPage() {
                 <div className="flex flex-col items-center justify-center min-h-[160px] text-[var(--taupe)] font-sans text-sm">No try-ons yet</div>
               ) : (
                 tryOnInstances.map((instance) => (
-                  <div className="flex flex-col min-w-[220px] max-w-[220px] bg-[var(--jet)] rounded-xl shadow-md overflow-hidden">
+                  <div key={instance.id} className="flex flex-col min-w-[220px] max-w-[220px] bg-[var(--jet)] rounded-xl shadow-md overflow-hidden">
                     <div className="w-full aspect-[3/4] bg-[var(--linen)]">
                       <img
                         src={instance.photoUrl}

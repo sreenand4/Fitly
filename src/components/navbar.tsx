@@ -117,7 +117,7 @@ export default function Navbar() {
                         {/* Only show to consumers */}
                         {userType == "consumer" && 
                         <li>
-                            <Link href="/fittingroom" className="hover:text-[var(--taupe)]">Fitting Room</Link>
+                            <Link href="/user/fittingroom" className="hover:text-[var(--taupe)]">Fitting Room</Link>
                         </li>}
                         {userType == "consumer" && 
                         <li>
@@ -161,7 +161,7 @@ export default function Navbar() {
                         <li> <Link href={getDashboardLink()} className="hover:text-[var(--taupe)]">Dashboard</Link> </li>
                         {/* Only show to consumers */}
                         {userType == "consumer" && 
-                            <li> <Link href="/fittingroom" className="hover:text-[var(--taupe)]">Fitting Room</Link> </li>}
+                            <li> <Link href="/user/fittingroom" className="hover:text-[var(--taupe)]">Fitting Room</Link> </li>}
                         {userType == "consumer" && 
                             <li> <Link href="/user/size-estimation" className="hover:text-[var(--taupe)]">Size Estimation</Link> </li>}
                         {userType == "consumer" && 

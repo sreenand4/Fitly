@@ -9,7 +9,7 @@ export function middleware(request: NextRequest) {
     const userType = request.cookies.get('userType')?.value;
 
     // Public routes that don't need authentication
-    if (path === '/' || path === '/auth' || path.startsWith('/fittingroom')) {
+    if (path === '/' || path === '/auth') {
         return NextResponse.next();
     }
 
