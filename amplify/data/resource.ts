@@ -64,6 +64,7 @@ const schema = a.schema({
     retailer: a.belongsTo('Retailer', 'retailerId'),
     name: a.string().required(),
     description: a.string(),
+    purchaseUrl: a.string(),
     gender: a.enum(['MALE', 'FEMALE', 'UNISEX']),
     type: a.enum(['TOP', 'BOTTOM', 'DRESS']),
     price: a.float().required(),
