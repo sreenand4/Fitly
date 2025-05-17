@@ -194,23 +194,30 @@ export default function DashboardPage() {
                 <div className="flex flex-col items-center justify-center min-h-[160px] text-[var(--taupe)] font-sans text-sm">No try-ons yet</div>
               ) : (
                 tryOnInstances.map((instance) => (
-                  <div key={instance.id} className="flex flex-col min-w-[220px] max-w-[220px] bg-[var(--jet)] rounded-xl shadow-md overflow-hidden">
-                    <div className="w-full aspect-[3/4] bg-[var(--linen)]">
+                  <div key={instance.id} className="flex flex-col min-w-[220px] max-w-[220px] h-[400px] bg-[var(--jet)] rounded-xl shadow-md overflow-hidden">
+                    <div className="flex-1 min-h-0 w-full bg-[var(--linen)] flex items-center justify-center">
                       <img
                         src={instance.photoUrl}
                         alt="Try-On Result"
                         className="w-full h-full object-cover"
+                        style={{ objectFit: "cover" }}
                       />
                     </div>
                     {instance.product && (
-                      <div className="bg-[var(--taupe)]/90 px-4 py-3 flex flex-row justify-between w-full">
+                      <div className="bg-[var(--taupe)]/90 px-4 py-3 flex flex-row justify-between w-full flex-shrink-0">
                         <div className="flex flex-col items-start">
                           <span className="text-base text-white font-sans">{instance.product.name}</span>
                           <span className="text-xs text-white font-sans mb-1 line-clamp-3">{instance.product.description}</span>
                         </div>
                         <div className="flex flex-col items-end">
                           <span className="text-sm text-[var(--linen)] font-sans">${instance.product.price}</span>
-                          <span className="text-xs text-[var(--linen)] font-sans mb-1 line-clamp-3">{instance.product.gender === "MALE" ? "Men's" : instance.product.gender === "FEMALE" ? "Women's" : "Unisex"}</span>
+                          <span className="text-xs text-[var(--linen)] font-sans mb-1 line-clamp-3">
+                            {instance.product.gender === "MALE"
+                              ? "Men's"
+                              : instance.product.gender === "FEMALE"
+                              ? "Women's"
+                              : "Unisex"}
+                          </span>
                         </div>
                       </div>
                     )}

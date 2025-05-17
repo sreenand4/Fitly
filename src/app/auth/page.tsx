@@ -184,6 +184,7 @@ export default function AuthPage() {
                 console.log("Height calculated:", heightInCm);
                 
                 const userData = {
+                    id: user.userId,
                     username: preferredUsername,
                     firstName: userAttributes.given_name,
                     lastName: userAttributes.family_name,

@@ -85,9 +85,13 @@ const schema = a.schema({
     product: a.belongsTo('Product', 'productId'),
     photoUrl: a.string().required(),
     recommendedSize: a.string(),
+    // user feedback results 
+    purchaseConfidence: a.enum(['YES', 'SOMEWHAT', 'NO']),
+    returnLikelihood: a.enum(['LESS_LIKELY', 'SAME', 'MORE_LIKELY']),
+    conversionBoost: a.enum(['DEFINITELY', 'MAYBE', 'NO']),
   })
     .authorization((allow) => [
-      allow.authenticated().to(['create', 'read']),
+      allow.authenticated().to(['create', 'read', 'update', 'delete']),
       allow.owner().to(['read', 'update', 'delete']),
     ]),
 

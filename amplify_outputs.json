@@ -769,6 +769,33 @@
               "isRequired": false,
               "attributes": []
             },
+            "purchaseConfidence": {
+              "name": "purchaseConfidence",
+              "isArray": false,
+              "type": {
+                "enum": "TryOnInstancePurchaseConfidence"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "returnLikelihood": {
+              "name": "returnLikelihood",
+              "isArray": false,
+              "type": {
+                "enum": "TryOnInstanceReturnLikelihood"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "conversionBoost": {
+              "name": "conversionBoost",
+              "isArray": false,
+              "type": {
+                "enum": "TryOnInstanceConversionBoost"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
             "createdAt": {
               "name": "createdAt",
               "isArray": false,
@@ -801,7 +828,9 @@
                     "allow": "private",
                     "operations": [
                       "create",
-                      "read"
+                      "read",
+                      "update",
+                      "delete"
                     ]
                   },
                   {
@@ -981,6 +1010,30 @@
             "TOP",
             "BOTTOM",
             "DRESS"
+          ]
+        },
+        "TryOnInstancePurchaseConfidence": {
+          "name": "TryOnInstancePurchaseConfidence",
+          "values": [
+            "YES",
+            "SOMEWHAT",
+            "NO"
+          ]
+        },
+        "TryOnInstanceReturnLikelihood": {
+          "name": "TryOnInstanceReturnLikelihood",
+          "values": [
+            "LESS_LIKELY",
+            "SAME",
+            "MORE_LIKELY"
+          ]
+        },
+        "TryOnInstanceConversionBoost": {
+          "name": "TryOnInstanceConversionBoost",
+          "values": [
+            "DEFINITELY",
+            "MAYBE",
+            "NO"
           ]
         },
         "SizeGuideCategory": {

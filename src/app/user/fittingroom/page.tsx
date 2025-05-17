@@ -46,10 +46,11 @@ export default function FittingRoomPage() {
   const [products, setProducts] = useState<any[]>([]);
 
   // Survey Modal States
-  const [showSurveyModal, setShowSurveyModal] = useState(true);
+  const [showSurveyModal, setShowSurveyModal] = useState(false);
   const [surveyConfidence, setSurveyConfidence] = useState<string>("");
   const [surveyLikelihoodReturn, setSurveyLikelihoodReturn] = useState<string>("");
   const [surveyLikelihoodBuy, setSurveyLikelihoodBuy] = useState<string>("");
+  const [isSubmittingSurvey, setIsSubmittingSurvey] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -459,17 +460,36 @@ export default function FittingRoomPage() {
     likelihoodBuy: ["Definitely", "Maybe", "No"],
   };
 
-  const handleSurveySubmit = () => {
+  const handleSurveySubmit = async (triedOnProductId: string) => {
+    setIsSubmittingSurvey(true);
     console.log("Survey Submitted:");
     console.log("Confidence:", surveyConfidence);
     console.log("Likelihood to Return:", surveyLikelihoodReturn);
     console.log("Likelihood to Buy:", surveyLikelihoodBuy);
-    // For now, just close the modal. Later, this will send data to a backend.
+
+    // get the tryOnInstanceId from the triedOnProductId
+    const {data: tryOnInstance, errors: tryOnInstanceErrors} = await client.models.TryOnInstance.list({
+      filter: {
+        productId: {eq: triedOnProductId}
+      }
+    });
+    if (tryOnInstanceErrors) {
+      console.error("Error fetching tryOnInstance:", tryOnInstanceErrors);
+    }
+    const tryOnInstanceId = tryOnInstance[0].id;
+
+    const {data: updatedTryOnInstance, errors} = await client.models.TryOnInstance.update({
+      id: tryOnInstanceId,
+      purchaseConfidence: surveyConfidence === "Yes" ? "YES" : surveyConfidence === "Somewhat" ? "SOMEWHAT" : surveyConfidence === "Not really" ? "NO" : null,
+      returnLikelihood: surveyLikelihoodReturn === "Less likely" ? "LESS_LIKELY" : surveyLikelihoodReturn === "Same" ? "SAME" : surveyLikelihoodReturn === "More likely" ? "MORE_LIKELY" : null,
+      conversionBoost: surveyLikelihoodBuy === "Definitely" ? "DEFINITELY" : surveyLikelihoodBuy === "Maybe" ? "MAYBE" : surveyLikelihoodBuy === "No" ? "NO" : null,
+    });
+    if (errors) {
+      console.error("Error updating tryOnInstance:", errors);
+    }
+    console.log("Updated tryOnInstance:", updatedTryOnInstance);
     setShowSurveyModal(false);
-    // Optionally, reset survey states if the modal might reopen for another survey
-    setSurveyConfidence("");
-    setSurveyLikelihoodReturn("");
-    setSurveyLikelihoodBuy("");
+    setIsSubmittingSurvey(false);
   };
 
   return (
@@ -741,7 +761,7 @@ export default function FittingRoomPage() {
       </div>
 
       {/* Survey Modal */}
-      {showSurveyModal && tryOnResult && triedOnProduct && (
+      { showSurveyModal && tryOnResult && triedOnProduct && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/30 backdrop-blur-md" onClick={() => setShowSurveyModal(false)}></div>
@@ -868,11 +888,11 @@ export default function FittingRoomPage() {
               </div>
 
               <button 
-                onClick={handleSurveySubmit}
+                onClick={() => handleSurveySubmit(triedOnProduct.id)}
                 className={`w-full bg-[var(--taupe)] font-sans text-white py-1.5 px-4 rounded-full text-sm hover:bg-opacity-85 transition mt-auto ${!(surveyConfidence && surveyLikelihoodReturn && surveyLikelihoodBuy) ? "opacity-50 cursor-not-allowed" : ""}`}
-                disabled={!surveyConfidence || !surveyLikelihoodReturn || !surveyLikelihoodBuy} // Optional: disable if not all answered
+                disabled={!surveyConfidence || !surveyLikelihoodReturn || !surveyLikelihoodBuy || isSubmittingSurvey}
               >
-                Submit Feedback
+                {isSubmittingSurvey ? "Submitting..." : "Submit Feedback"}
               </button>
             </div>
           </div>
