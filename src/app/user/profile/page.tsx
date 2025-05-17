@@ -85,14 +85,12 @@ export default function Profile() {
                   </div>
                   <div className="flex flex-row gap-6 mb-2">
                     <div className="flex-1 flex items-center gap-2">
-                      <Mail className="h-5 w-5 text-[var(--taupe)]" />
                       <div>
                         <div className="text-xs text-[var(--taupe)] font-sans mb-1">Email</div>
                         <div className="text-lg text-[var(--jet)] font-sans">{profile.email || "-"}</div>
                       </div>
                     </div>
                     <div className="flex-1 flex items-center gap-2">
-                      <Badge className="h-5 w-5 text-[var(--taupe)]" />
                       <div>
                         <div className="text-xs text-[var(--taupe)] font-sans mb-1">Username</div>
                         <div className="text-lg text-[var(--jet)] font-sans">{userModel?.username || profile.preferred_username || profile.email || "-"}</div>
@@ -101,14 +99,12 @@ export default function Profile() {
                   </div>
                   <div className="flex flex-row gap-6 mb-2">
                     <div className="flex-1 flex items-center gap-2">
-                      <User className="h-5 w-5 text-[var(--taupe)]" />
                       <div>
                         <div className="text-xs text-[var(--taupe)] font-sans mb-1">Gender</div>
                         <div className="text-lg text-[var(--jet)] font-sans">{userModel?.gender === "M" ? "Male" : userModel?.gender === "F" ? "Female" : "-"}</div>
                       </div>
                     </div>
                     <div className="flex-1 flex items-center gap-2">
-                      <Ruler className="h-5 w-5 text-[var(--taupe)]" />
                       <div>
                         <div className="text-xs text-[var(--taupe)] font-sans mb-1">Height (cm)</div>
                         <div className="text-lg text-[var(--jet)] font-sans">{userModel?.height || "-"}</div>
