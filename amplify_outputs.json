@@ -565,6 +565,13 @@
               "isRequired": false,
               "attributes": []
             },
+            "purchaseUrl": {
+              "name": "purchaseUrl",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
             "gender": {
               "name": "gender",
               "isArray": false,
