@@ -191,7 +191,7 @@ export default function DashboardPage() {
             <span className="font-bold text-lg font-sans">Recent Try-ons</span>
             <div className="flex flex-row gap-6 overflow-x-auto py-2 scrollbar-thin scrollbar-thumb-[var(--taupe)] scrollbar-track-[var(--bone)]">
               {tryOnInstances.length === 0 ? (
-                <div className="flex flex-col items-center justify-center min-h-[160px] text-[var(--taupe)] font-sans text-sm">No try-ons yet</div>
+                <div className="flex w-full items-center justify-center min-h-[160px] text-[var(--taupe)] font-sans text-sm">No try-ons yet</div>
               ) : (
                 tryOnInstances.map((instance) => (
                   <div key={instance.id} className="flex flex-col min-w-[220px] max-w-[220px] h-[400px] bg-[var(--jet)] rounded-xl shadow-md overflow-hidden">
