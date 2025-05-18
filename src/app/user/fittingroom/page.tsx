@@ -189,7 +189,6 @@ export default function FittingRoomPage() {
         console.log("handleImageUpload: S3 upload successful:", uploadResult);
         
         // Construct permanent S3 URL (logic adapted from ImageUploader.tsx)
-        // Ensure amplify_outputs.json is correctly referenced from this file's location
         // For src/app/user/fittingroom/page.tsx, it should be ../../../../amplify_outputs.json
         const amplifyOutputs = require('../../../../amplify_outputs.json'); 
         const bucketName = amplifyOutputs.storage.bucket_name;
