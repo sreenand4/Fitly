@@ -1,0 +1,29 @@
+@font-face {
+  font-family: "Margin";
+  src: url("/fonts/Margin DEMO.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Define CSS Variables for Fonts */
+:root {
+  --font-sans: "Poppins", sans-serif;
+
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+:root {
+  --linen: #f8ede2;
+  --jet: #2b2b2b;
+  --taupe: #564033;
+  --sienna: #de6854;
+  --bone: #ded1c2;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--jet);
+}
+
+@import "tailwindcss";
