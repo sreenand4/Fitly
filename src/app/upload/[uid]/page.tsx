@@ -2,16 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { initializeApp } from "firebase/app";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getStorage, ref, uploadBytes, getDownloadURL, listAll } from "firebase/storage";
 
 // Firebase configuration
 const firebaseConfig = {
   storageBucket: "fitly-3f935.firebasestorage.app",
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
 };
 
 //Initialize Firebase
@@ -20,17 +17,27 @@ const storage = getStorage(app);
 
 export default function UploadPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const uid = params.uid as string;
+  const plan = searchParams.get('plan');
   
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const planValues = {
+    'prod_qMqklUfqRb': 1,
+    'prod_SctpCx2gqt1qxC': 2,
+    'prod_SctsVJzKMsLSSV': 10,
+    'prod_SctudJelPfa7aG': 1000,
+  }
+
   // Log the UID from URL on component mount
   useEffect(() => {
     console.log("Current UID from URL:", uid);
+    console.log("Plan from URL query:", plan);
     console.log("Firebase Storage initialized with bucket:", firebaseConfig.storageBucket);
-  }, [uid]);
+  }, [uid, plan]);
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -54,14 +61,24 @@ export default function UploadPage() {
       return;
     }
 
-    // Immediately start upload
-    await uploadFile(file);
+    // get their current image count from storage bucket
+    const storageRef = ref(storage, `images/${uid}`);
+    const bucketContents = await listAll(storageRef);
+    const currentImageCount = bucketContents.items.length;
+
+    // check if they have reached their image limit
+    if (currentImageCount >= planValues[plan as keyof typeof planValues]) {
+      setError(`You have reached your image limit of ${planValues[plan as keyof typeof planValues]}. Please upgrade to a higher plan.`);
+      return;
+    } else {
+      await uploadFile(file);
+    }
   };
 
   const uploadFile = async (file: File) => {
     if (!uid) {
       console.error("Cannot upload: missing UID");
-      setError("Missing user ID. Please check your link and try again.");
+      setError("Missing user ID. Please refresh the extension and scan the QR code again.");
       return;
     }
 
