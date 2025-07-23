@@ -30,8 +30,8 @@ export default function Pricing() {
 
   const stripeTableHtml = `
     <stripe-pricing-table
-      pricing-table-id="prctbl_1RhePT4QdM9LQQXnP8ug6sGB"
-      publishable-key="pk_test_51RhORL4QdM9LQQXnIaH9lKmhmEBRekPIT6sRYPt7wytXdhGQJ21vBRkdg58Py2ztfuQgLPAjGn0m9jwhjXd3Msoq00uNgHxaF1"
+      pricing-table-id="prctbl_1Rnn1oGDHeBJiM6RInzipQCY"
+      publishable-key="pk_live_51RhORFGDHeBJiM6Rb12h6uWNHOyzpGyfZOoRd0XhJsWtMEVKx5m2CC2S1MnlVjWOHH5oLUn2OS19Zhi9oPNn3CqM00qcu01JwG"
       client-reference-id="${uid}"
     ></stripe-pricing-table>
   `;

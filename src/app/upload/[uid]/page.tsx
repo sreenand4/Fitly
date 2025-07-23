@@ -27,9 +27,9 @@ export default function UploadPage() {
 
   const planValues = {
     'prod_qMqklUfqRb': 1,
-    'prod_SctpCx2gqt1qxC': 2,
-    'prod_SctsVJzKMsLSSV': 10,
-    'prod_SctudJelPfa7aG': 1000,
+    'prod_SjFQcoZE8XtsD3': 4,
+    'prod_SjFQ6Z8tqBLj4F': 10,
+    'prod_SjFQn2d1uBiEDc': 1000,
   }
 
   // Log the UID from URL on component mount
