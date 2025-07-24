@@ -24,6 +24,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={poppins.variable}>
+      <head>
+        <meta name="google-site-verification" content="ph9JaxRAo7iBw0NVOw4W_JGmnE6vTcdmJqU7-BubFUY" />
+      </head>
       <body>
         <Navbar />
         {children}
